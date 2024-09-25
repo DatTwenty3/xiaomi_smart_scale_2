@@ -136,7 +136,10 @@ age_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
 weight_label = tk.Label(root, text="Cân nặng: -- kg", font=("Helvetica", 12),
                         anchor="w")  # Căn lề trái
 weight_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-
+# Nhãn hiển thị giới tính
+gender_label = tk.Label(root, text="Giới tính: --", font=("Helvetica", 12),
+                        anchor="w")  # Căn lề trái
+gender_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị BMI, BMR, TDEE
 bmi_label = tk.Label(root, text="BMI: --", font=("Helvetica", 12),
                      anchor="w")  # Căn lề trái
@@ -206,6 +209,7 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         bmr, tdee = calculate_bmr_tdee(weight, user_info['height'], age, user_info['gender'], user_info['activity_factor'])
 
         # Cập nhật các nhãn hiển thị
+        gender_label.config(text=f"Nam")
         bmi_label.config(text=f"BMI: {bmi:.2f}")
         bmr_label.config(text=f"BMR: {bmr:.0f} kcal/day")
         tdee_label.config(text=f"TDEE: {tdee:.0f} kcal/day")
