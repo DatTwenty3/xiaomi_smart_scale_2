@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from datetime import datetime
+import predict_gender as ai_predict
+import metrics_calculate as mc
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -25,7 +27,7 @@ class UserInfoDialog(simpledialog.Dialog):
         tk.Label(master, text="Tên:").grid(row=0)
         tk.Label(master, text="Ngày sinh (dd/mm/yyyy):").grid(row=1)
         tk.Label(master, text="Chiều cao (cm):").grid(row=2)
-        tk.Label(master, text="Giới tính:").grid(row=3)
+        #tk.Label(master, text="Giới tính:").grid(row=3)
         tk.Label(master, text="Hệ số hoạt động:").grid(row=4)
 
         self.name_entry = tk.Entry(master)
@@ -37,10 +39,10 @@ class UserInfoDialog(simpledialog.Dialog):
         self.height_entry.grid(row=2, column=1)
 
         # Tạo danh sách thả xuống cho giới tính
-        self.gender_var = tk.StringVar()
-        self.gender_var.set("Nam")  # Giá trị mặc định
-        self.gender_menu = ttk.OptionMenu(master, self.gender_var, "Nam", "Nam", "Nữ")
-        self.gender_menu.grid(row=3, column=1)
+        #self.gender_var = tk.StringVar()
+        #self.gender_var.set("Nam")  # Giá trị mặc định
+        #self.gender_menu = ttk.OptionMenu(master, self.gender_var, "Nam", "Nam", "Nữ")
+        #self.gender_menu.grid(row=3, column=1)
 
         # Tạo danh sách thả xuống cho hệ số hoạt động
         self.activity_var = tk.StringVar()
@@ -69,7 +71,7 @@ class UserInfoDialog(simpledialog.Dialog):
             "name": self.name_entry.get(),
             "dob": self.dob_entry.get(),
             "height": float(self.height_entry.get()),
-            "gender": self.gender_var.get().lower(),
+            #"gender": self.gender_var.get().lower(),
             "activity_factor": activity_factors[self.activity_var.get()]
         }
 
@@ -94,7 +96,7 @@ def calculate_age(dob_str):
 
 # Tính BMR và TDEE
 def calculate_bmr_tdee(weight, height, age, gender, activity_factor):
-    if gender == 'nam':
+    if gender == 'male':
         bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
     else:
         bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
@@ -137,7 +139,7 @@ weight_label = tk.Label(root, text="Cân nặng: -- kg", font=("Helvetica", 12),
                         anchor="w")  # Căn lề trái
 weight_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị giới tính
-gender_label = tk.Label(root, text="Giới tính: --", font=("Helvetica", 12),
+gender_label = tk.Label(root, text="Giới tính (dự đoán): --", font=("Helvetica", 12),
                         anchor="w")  # Căn lề trái
 gender_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị BMI, BMR, TDEE
@@ -202,14 +204,22 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         weight_label.config(text=f"Cân nặng: {weight:.2f} kg")  # Update the label in the GUI
 
         # Tính BMI
-        height_in_meters = user_info['height'] / 100.0
-        bmi = weight / (height_in_meters ** 2)
+        #height_in_meters = user_info['height'] / 100.0
+        #bmi = weight / (height_in_meters ** 2)
+        bmi = mc.get_bmi(user_info['height'], weight)
+
+        # Dự đoán giới tính
+        predicted_gender = ai_predict.predict_gender(user_info['height'], weight)
 
         # Tính BMR và TDEE
-        bmr, tdee = calculate_bmr_tdee(weight, user_info['height'], age, user_info['gender'], user_info['activity_factor'])
+        #bmr, tdee = calculate_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
+        bmr, tdee = mc.get_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
 
         # Cập nhật các nhãn hiển thị
-        gender_label.config(text=f"Nam")
+        if predicted_gender == "male":
+            gender_label.config(text=f"Nam")
+        else:
+            gender_label.config(text=f"Nữ")
         bmi_label.config(text=f"BMI: {bmi:.2f}")
         bmr_label.config(text=f"BMR: {bmr:.0f} kcal/day")
         tdee_label.config(text=f"TDEE: {tdee:.0f} kcal/day")
