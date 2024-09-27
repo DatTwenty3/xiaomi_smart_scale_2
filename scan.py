@@ -152,6 +152,31 @@ bmr_label.pack(pady=10, padx=10, fill=tk.X)
 tdee_label = tk.Label(root, text="TDEE: --", font=("Helvetica", 12),
                       anchor="w")  # Căn lề trái
 tdee_label.pack(pady=10, padx=10, fill=tk.X)
+# Nhãn hiển thị khối lượng cơ thể nạc
+lean_mass_label = tk.Label(root, text="Khối lượng cơ thể nạc: -- kg", font=("Helvetica", 12),
+                            anchor="w")  # Căn lề trái
+lean_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+# Nhãn hiển thị phần trăm mỡ
+body_fat_label = tk.Label(root, text="Phần trăm mỡ: -- %", font=("Helvetica", 12),
+                          anchor="w")  # Căn lề trái
+body_fat_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+# Nhãn hiển thị phần trăm nước
+water_percentage_label = tk.Label(root, text="Phần trăm nước: -- %", font=("Helvetica", 12),
+                                   anchor="w")  # Căn lề trái
+water_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+# Nhãn hiển thị khối lượng xương
+bone_mass_label = tk.Label(root, text="Khối lượng xương: -- kg", font=("Helvetica", 12),
+                            anchor="w")  # Căn lề trái
+bone_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+# Nhãn hiển thị khối lượng cơ
+muscle_mass_label = tk.Label(root, text="Khối lượng cơ: -- kg", font=("Helvetica", 12),
+                              anchor="w")  # Căn lề trái
+muscle_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+# Nhãn hiển thị phần trăm protein
+protein_percentage_label = tk.Label(root, text="Phần trăm protein: -- %", font=("Helvetica", 12),
+                                     anchor="w")  # Căn lề trái
+protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+
 
 async def find_miscale_device():
     return await BleakScanner().find_device_by_name("MI SCALE2")
