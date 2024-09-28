@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
 from datetime import datetime
-import predict_gender as ai_predict
+import ai_predict as ap
 import metrics_calculate as mc
 
 from bleak import BleakClient, BleakScanner
@@ -27,7 +27,7 @@ class UserInfoDialog(simpledialog.Dialog):
         tk.Label(master, text="Tên:").grid(row=0)
         tk.Label(master, text="Ngày sinh (dd/mm/yyyy):").grid(row=1)
         tk.Label(master, text="Chiều cao (cm):").grid(row=2)
-        #tk.Label(master, text="Giới tính:").grid(row=3)
+        # tk.Label(master, text="Giới tính:").grid(row=3)
         tk.Label(master, text="Hệ số hoạt động:").grid(row=4)
 
         self.name_entry = tk.Entry(master)
@@ -39,10 +39,10 @@ class UserInfoDialog(simpledialog.Dialog):
         self.height_entry.grid(row=2, column=1)
 
         # Tạo danh sách thả xuống cho giới tính
-        #self.gender_var = tk.StringVar()
-        #self.gender_var.set("Nam")  # Giá trị mặc định
-        #self.gender_menu = ttk.OptionMenu(master, self.gender_var, "Nam", "Nam", "Nữ")
-        #self.gender_menu.grid(row=3, column=1)
+        # self.gender_var = tk.StringVar()
+        # self.gender_var.set("Nam")  # Giá trị mặc định
+        # self.gender_menu = ttk.OptionMenu(master, self.gender_var, "Nam", "Nam", "Nữ")
+        # self.gender_menu.grid(row=3, column=1)
 
         # Tạo danh sách thả xuống cho hệ số hoạt động
         self.activity_var = tk.StringVar()
@@ -71,7 +71,7 @@ class UserInfoDialog(simpledialog.Dialog):
             "name": self.name_entry.get(),
             "dob": self.dob_entry.get(),
             "height": float(self.height_entry.get()),
-            #"gender": self.gender_var.get().lower(),
+            # "gender": self.gender_var.get().lower(),
             "activity_factor": activity_factors[self.activity_var.get()]
         }
 
@@ -111,9 +111,9 @@ root.title("Weight and Body Composition")
 # Thông tin nhập được
 age = calculate_age(user_info['dob'])
 name_label = tk.Label(root,
-                       text=f"Tên: {user_info['name']}",
-                       font=("Helvetica", 12),
-                       anchor="w")  # Căn lề trái
+                      text=f"Tên: {user_info['name']}",
+                      font=("Helvetica", 12),
+                      anchor="w")  # Căn lề trái
 name_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
 
 dob_label = tk.Label(root,
@@ -123,9 +123,9 @@ dob_label = tk.Label(root,
 dob_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
 
 height_label = tk.Label(root,
-                         text=f"Chiều cao: {user_info['height']:.0f} cm",
-                         font=("Helvetica", 12),
-                         anchor="w")  # Căn lề trái
+                        text=f"Chiều cao: {user_info['height']:.0f} cm",
+                        font=("Helvetica", 12),
+                        anchor="w")  # Căn lề trái
 height_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
 
 age_label = tk.Label(root,
@@ -154,7 +154,7 @@ tdee_label = tk.Label(root, text="TDEE: --", font=("Helvetica", 12),
 tdee_label.pack(pady=10, padx=10, fill=tk.X)
 # Nhãn hiển thị khối lượng cơ thể nạc
 lean_mass_label = tk.Label(root, text="Khối lượng cơ thể nạc: -- kg", font=("Helvetica", 12),
-                            anchor="w")  # Căn lề trái
+                           anchor="w")  # Căn lề trái
 lean_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị phần trăm mỡ
 body_fat_label = tk.Label(root, text="Phần trăm mỡ: -- %", font=("Helvetica", 12),
@@ -162,27 +162,27 @@ body_fat_label = tk.Label(root, text="Phần trăm mỡ: -- %", font=("Helvetica
 body_fat_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị phần trăm nước
 water_percentage_label = tk.Label(root, text="Phần trăm nước: -- %", font=("Helvetica", 12),
-                                   anchor="w")  # Căn lề trái
+                                  anchor="w")  # Căn lề trái
 water_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị khối lượng xương
 bone_mass_label = tk.Label(root, text="Khối lượng xương: -- kg", font=("Helvetica", 12),
-                            anchor="w")  # Căn lề trái
+                           anchor="w")  # Căn lề trái
 bone_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị khối lượng cơ
 muscle_mass_label = tk.Label(root, text="Khối lượng cơ: -- kg", font=("Helvetica", 12),
-                              anchor="w")  # Căn lề trái
+                             anchor="w")  # Căn lề trái
 muscle_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị phần trăm protein
 protein_percentage_label = tk.Label(root, text="Phần trăm protein: -- %", font=("Helvetica", 12),
-                                     anchor="w")  # Căn lề trái
+                                    anchor="w")  # Căn lề trái
 protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị phần trăm mo noi tang
 protein_percentage_label = tk.Label(root, text="Phần trăm mỡ nội tạng: -- %", font=("Helvetica", 12),
-                                     anchor="w")  # Căn lề trái
+                                    anchor="w")  # Căn lề trái
 protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị cân nặng lý tưởng
 protein_percentage_label = tk.Label(root, text="Cân nặng lý tưởng: -- kg", font=("Helvetica", 12),
-                                     anchor="w")  # Căn lề trái
+                                    anchor="w")  # Căn lề trái
 protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 
 
@@ -198,11 +198,13 @@ bmr_eval_label.pack(pady=10)
 tdee_eval_label = tk.Label(root, text="", font=("Helvetica", 12))
 tdee_eval_label.pack(pady=10)
 
+
 # Cập nhật phần đánh giá sau khi tính toán
 def update_evaluation(bmi, bmr, tdee, weight):
     bmi_eval_label.config(text=f"Bạn đang {mc.evaluate_bmi(bmi, user_info['height'], weight)}")
     bmr_eval_label.config(text=f"{mc.evaluate_bmr(bmr)}")
     tdee_eval_label.config(text=f"{mc.evaluate_tdee(tdee)}")
+
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
     """Parses body composition data and updates the GUI"""
@@ -218,34 +220,35 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         bmi = mc.get_bmi(user_info['height'], weight)
 
         # Dự đoán giới tính
-        predicted_gender = ai_predict.predict_gender(user_info['height'], weight)
+        predicted_gender = ap.predict_gender(user_info['height'], weight)
 
         # Tính BMR và TDEE
         # bmr, tdee = calculate_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
         bmr, tdee = mc.get_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
 
-        #Tinh LBM
+        # Tinh LBM
         lbm = mc.get_lbm(user_info['height'], weight, predicted_gender)
 
-        #Tinh fat percentage
-        fp = mc.get_fat_percentage(predicted_gender, age, weight, user_info['height'])
+        # Tinh fat percentage
+        # fp = mc.get_fat_percentage(predicted_gender, age, weight, user_info['height'])
+        fp = ap.predict_body_fat(age, predicted_gender, user_info['height'], weight)
 
-        #Tinh water percentage
+        # Tinh water percentage
         wp = mc.get_water_percentage(predicted_gender, age, weight, user_info['height'])
 
-        #Tinh bone mass
+        # Tinh bone mass
         bm = mc.get_bone_mass(user_info['height'], weight, predicted_gender)
 
-        #Tinh muscle mass
+        # Tinh muscle mass
         ms = mc.get_muscle_mass(predicted_gender, age, weight, user_info['height'])
 
-        #Tinh protein percentage
+        # Tinh protein percentage
         pp = mc.get_protein_percentage(predicted_gender, age, weight, user_info['height'], True)
 
-        #Tinh mo noi tang
+        # Tinh mo noi tang
         vf = mc.get_visceral_fat(predicted_gender, user_info['height'], weight, age)
 
-        #Tinh can nang ly tuong
+        # Tinh can nang ly tuong
         iw = mc.get_ideal_weight(predicted_gender, user_info['height'], True)
         ###########################################CALULATOR AREA#######################################################
         # Cập nhật các nhãn hiển thị
