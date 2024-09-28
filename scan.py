@@ -72,7 +72,7 @@ class UserInfoDialog(simpledialog.Dialog):
 
             # Điền thông tin tương ứng
             self.dob_entry.insert(0, user_info['dob'].values[0])
-            self.height_entry.insert(0, user_info['height'].values[0])
+            self.height_entry.insert(0, int(user_info['height'].values[0]))
             # Cập nhật hệ số hoạt động tương ứng
             activity_mapping = {
                 1.2: "Ít vận động",
@@ -95,7 +95,7 @@ class UserInfoDialog(simpledialog.Dialog):
         self.result = {
             "name": self.name_var.get(),
             "dob": self.dob_entry.get(),
-            "height": float(self.height_entry.get()),
+            "height": self.height_entry.get(),
             "activity_factor": activity_factors[self.activity_var.get()]
         }
 
@@ -109,6 +109,25 @@ def input_user_info():
 user_info = input_user_info()
 
 age = mc.calculate_age(user_info['dob'])
+
+measurements = {
+    'gender':'male',
+    'weight': 70.0,
+    'age': 30,
+    'bmi': 22.5,
+    'bmr': 1500,
+    'tdee': 2000,
+    'lbm': 60.0,
+    'fp': 15.0,
+    'wp': 50.0,
+    'bm': 5.0,
+    'ms': 25.0,
+    'pp': 18.0,
+    'vf': 10.0,
+    'iw': 65.0
+}
+
+cu.update_csv(user_info, measurements)
 
 async def find_miscale_device():
     return await BleakScanner().find_device_by_name("MI SCALE2")
