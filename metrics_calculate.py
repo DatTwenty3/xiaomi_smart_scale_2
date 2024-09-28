@@ -24,6 +24,35 @@ def get_bmr_tdee(weight, height, age, gender, activity_factor):
     return bmr, tdee
 
 
+# Hàm đánh giá dựa trên chỉ số BMI
+def evaluate_bmi(bmi, height, weight):
+    if bmi < 18.5:
+        weight_needed = 18.5 * (height / 100) ** 2 - weight
+        # bmi_eval_label.config(fg="blue", font=("Helvetica", 12, "bold"))  # Thiếu cân
+        return f"THIẾU CÂN. Bạn cần tăng khoảng {weight_needed:.2f} kg."
+    elif 18.5 <= bmi < 24.9:
+        # bmi_eval_label.config(fg="green", font=("Helvetica", 12, "bold"))  # Bình thường
+        return "BÌNH THƯỜNG. Giữ nguyên cân nặng."
+    elif 25 <= bmi < 29.9:
+        weight_needed = weight - 24.9 * (height / 100) ** 2
+        # bmi_eval_label.config(fg="orange", font=("Helvetica", 12, "bold"))  # Thừa cân
+        return f"THỪA CÂN. Bạn cần giảm khoảng {weight_needed:.2f} kg."
+    else:
+        weight_needed = weight - 24.9 * (height / 100) ** 2
+        # bmi_eval_label.config(fg="red", font=("Helvetica", 12, "bold"))  # Béo phì
+        return f"BÉO PHÌ. Bạn cần giảm khoảng {weight_needed:.2f} kg."
+
+
+# Hàm đánh giá dựa trên chỉ số BMR
+def evaluate_bmr(bmr):
+    return f"Cơ thể bạn cần {bmr:.0f} kcal/ngày để duy trì năng lượng cơ bản."
+
+
+# Hàm đánh giá dựa trên chỉ số TDEE
+def evaluate_tdee(tdee):
+    return f"Bạn cần tiêu thụ khoảng {tdee:.0f} kcal/ngày để duy trì cân nặng với mức độ vận động hiện tại."
+
+
 def get_lbm(height, weight, gender):
     if gender == 'male':
         return (0.32810 * weight) + (0.33929 * height) - 29.5336
@@ -150,7 +179,6 @@ def get_visceral_fat(gender, height, weight, age):
     return check_val_overflow(visceral_fat, 1, 50)
 
 
-
 def get_ideal_weight(gender, height, orig=True):
     # Uses mi fit algorithm (or holtek's one)
     if orig and gender == 'female':
@@ -160,27 +188,25 @@ def get_ideal_weight(gender, height, orig=True):
     else:
         return check_val_overflow((22 * height) * height / 10000, 5.5, 198)
 
+# gender = 'male'
+# age = 25
+# weight = 77.7
+# height = 166
+# activity_factor = 1.55
+#
+#
+# def print_with_function_name(func, *args):
+#     result = func(*args)
+#     print(f"Calling {func.__name__} with result: {result}")
 
-gender = 'male'
-age = 25
-weight = 77.7
-height = 166
-activity_factor = 1.55
 
-
-def print_with_function_name(func, *args):
-    result = func(*args)
-    print(f"Calling {func.__name__} with result: {result}")
-
-
-print_with_function_name(get_bmi, height, weight)
-print_with_function_name(get_bmr_tdee, weight, height, age, gender, activity_factor)
-print_with_function_name(get_lbm, height, weight, gender)
-print_with_function_name(get_fat_percentage, gender, age, weight, height)
-print_with_function_name(get_water_percentage, gender, age, weight, height)
-print_with_function_name(get_bone_mass, height, weight, gender)
-print_with_function_name(get_muscle_mass, gender, age, weight, height)
-print_with_function_name(get_protein_percentage, gender, age, weight, height, True)
-print_with_function_name(get_visceral_fat, gender, height, weight, age)
-print_with_function_name(get_ideal_weight, gender, height, True)
-
+# print_with_function_name(get_bmi, height, weight)
+# print_with_function_name(get_bmr_tdee, weight, height, age, gender, activity_factor)
+# print_with_function_name(get_lbm, height, weight, gender)
+# print_with_function_name(get_fat_percentage, gender, age, weight, height)
+# print_with_function_name(get_water_percentage, gender, age, weight, height)
+# print_with_function_name(get_bone_mass, height, weight, gender)
+# print_with_function_name(get_muscle_mass, gender, age, weight, height)
+# print_with_function_name(get_protein_percentage, gender, age, weight, height, True)
+# print_with_function_name(get_visceral_fat, gender, height, weight, age)
+# print_with_function_name(get_ideal_weight, gender, height, True)

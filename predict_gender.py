@@ -7,6 +7,6 @@ def predict_gender(height, weight):
 
     return str(prediction[0])
 
-#height = 170
-#weight = 60
-#print(predict_gender(height,weight))
+# height = 170
+# weight = 60
+# print(predict_gender(height,weight))

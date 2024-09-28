@@ -176,6 +176,14 @@ muscle_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 protein_percentage_label = tk.Label(root, text="Phần trăm protein: -- %", font=("Helvetica", 12),
                                      anchor="w")  # Căn lề trái
 protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+# Nhãn hiển thị phần trăm mo noi tang
+protein_percentage_label = tk.Label(root, text="Phần trăm mỡ nội tạng: -- %", font=("Helvetica", 12),
+                                     anchor="w")  # Căn lề trái
+protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+# Nhãn hiển thị cân nặng lý tưởng
+protein_percentage_label = tk.Label(root, text="Cân nặng lý tưởng: -- kg", font=("Helvetica", 12),
+                                     anchor="w")  # Căn lề trái
+protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 
 
 async def find_miscale_device():
@@ -190,36 +198,11 @@ bmr_eval_label.pack(pady=10)
 tdee_eval_label = tk.Label(root, text="", font=("Helvetica", 12))
 tdee_eval_label.pack(pady=10)
 
-# Hàm đánh giá dựa trên chỉ số BMI
-def evaluate_bmi(bmi, height, weight):
-    if bmi < 18.5:
-        weight_needed = 18.5 * (height / 100) ** 2 - weight
-        bmi_eval_label.config(fg="blue", font=("Helvetica", 12, "bold"))  # Thiếu cân
-        return f"THIẾU CÂN. Bạn cần tăng khoảng {weight_needed:.2f} kg."
-    elif 18.5 <= bmi < 24.9:
-        bmi_eval_label.config(fg="green", font=("Helvetica", 12, "bold"))  # Bình thường
-        return "BÌNH THƯỜNG. Giữ nguyên cân nặng."
-    elif 25 <= bmi < 29.9:
-        weight_needed = weight - 24.9 * (height / 100) ** 2
-        bmi_eval_label.config(fg="orange", font=("Helvetica", 12, "bold"))  # Thừa cân
-        return f"THỪA CÂN. Bạn cần giảm khoảng {weight_needed:.2f} kg."
-    else:
-        weight_needed = weight - 24.9 * (height / 100) ** 2
-        bmi_eval_label.config(fg="red", font=("Helvetica", 12, "bold"))  # Béo phì
-        return f"BÉO PHÌ. Bạn cần giảm khoảng {weight_needed:.2f} kg."
-# Hàm đánh giá dựa trên chỉ số BMR
-def evaluate_bmr(bmr):
-    return f"Cơ thể bạn cần {bmr:.0f} kcal/ngày để duy trì năng lượng cơ bản."
-
-# Hàm đánh giá dựa trên chỉ số TDEE
-def evaluate_tdee(tdee):
-    return f"Bạn cần tiêu thụ khoảng {tdee:.0f} kcal/ngày để duy trì cân nặng với mức độ vận động hiện tại."
-
 # Cập nhật phần đánh giá sau khi tính toán
 def update_evaluation(bmi, bmr, tdee, weight):
-    bmi_eval_label.config(text=f"Bạn đang {evaluate_bmi(bmi, user_info['height'], weight)}")
-    bmr_eval_label.config(text=f"{evaluate_bmr(bmr)}")
-    tdee_eval_label.config(text=f"{evaluate_tdee(tdee)}")
+    bmi_eval_label.config(text=f"Bạn đang {mc.evaluate_bmi(bmi, user_info['height'], weight)}")
+    bmr_eval_label.config(text=f"{mc.evaluate_bmr(bmr)}")
+    tdee_eval_label.config(text=f"{mc.evaluate_tdee(tdee)}")
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
     """Parses body composition data and updates the GUI"""
@@ -228,18 +211,43 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         print(f"Weight: {weight} kg")
         weight_label.config(text=f"Cân nặng: {weight:.2f} kg")  # Update the label in the GUI
 
+        ###########################################CALULATOR AREA#######################################################
         # Tính BMI
-        #height_in_meters = user_info['height'] / 100.0
-        #bmi = weight / (height_in_meters ** 2)
+        # height_in_meters = user_info['height'] / 100.0
+        # bmi = weight / (height_in_meters ** 2)
         bmi = mc.get_bmi(user_info['height'], weight)
 
         # Dự đoán giới tính
         predicted_gender = ai_predict.predict_gender(user_info['height'], weight)
 
         # Tính BMR và TDEE
-        #bmr, tdee = calculate_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
+        # bmr, tdee = calculate_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
         bmr, tdee = mc.get_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
 
+        #Tinh LBM
+        lbm = mc.get_lbm(user_info['height'], weight, predicted_gender)
+
+        #Tinh fat percentage
+        fp = mc.get_fat_percentage(predicted_gender, age, weight, user_info['height'])
+
+        #Tinh water percentage
+        wp = mc.get_water_percentage(predicted_gender, age, weight, user_info['height'])
+
+        #Tinh bone mass
+        bm = mc.get_bone_mass(user_info['height'], weight, predicted_gender)
+
+        #Tinh muscle mass
+        ms = mc.get_muscle_mass(predicted_gender, age, weight, user_info['height'])
+
+        #Tinh protein percentage
+        pp = mc.get_protein_percentage(predicted_gender, age, weight, user_info['height'], True)
+
+        #Tinh mo noi tang
+        vf = mc.get_visceral_fat(predicted_gender, user_info['height'], weight, age)
+
+        #Tinh can nang ly tuong
+        iw = mc.get_ideal_weight(predicted_gender, user_info['height'], True)
+        ###########################################CALULATOR AREA#######################################################
         # Cập nhật các nhãn hiển thị
         if predicted_gender == "male":
             gender_label.config(text=f"Nam")
