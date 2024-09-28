@@ -129,3 +129,58 @@ def get_protein_percentage(gender, age, weight, height, orig=True):
 
     return check_val_overflow(protein_percentage, 5, 32)
 
+
+def get_visceral_fat(gender, height, weight, age):
+    if gender == 'female':
+        if weight > (13 - (height * 0.5)) * -1:
+            subsubcalc = ((height * 1.45) + (height * 0.1158) * height) - 120
+            sub_calc = weight * 500 / subsubcalc
+            visceral_fat = (sub_calc - 6) + (age * 0.07)
+        else:
+            sub_calc = 0.691 + (height * -0.0024) + (height * -0.0024)
+            visceral_fat = (((height * 0.027) - (sub_calc * weight)) * -1) + (age * 0.07) - age
+    else:
+        if height < weight * 1.6:
+            sub_calc = ((height * 0.4) - (height * (height * 0.0826))) * -1
+            visceral_fat = ((weight * 305) / (sub_calc + 48)) - 2.9 + (age * 0.15)
+        else:
+            sub_calc = 0.765 + height * -0.0015
+            visceral_fat = (((height * 0.143) - (weight * sub_calc)) * -1) + (age * 0.15) - 5.0
+
+    return check_val_overflow(visceral_fat, 1, 50)
+
+
+
+def get_ideal_weight(gender, height, orig=True):
+    # Uses mi fit algorithm (or holtek's one)
+    if orig and gender == 'female':
+        return (height - 70) * 0.6
+    elif orig and gender == 'male':
+        return (height - 80) * 0.7
+    else:
+        return check_val_overflow((22 * height) * height / 10000, 5.5, 198)
+
+
+gender = 'male'
+age = 25
+weight = 77.7
+height = 166
+activity_factor = 1.55
+
+
+def print_with_function_name(func, *args):
+    result = func(*args)
+    print(f"Calling {func.__name__} with result: {result}")
+
+
+print_with_function_name(get_bmi, height, weight)
+print_with_function_name(get_bmr_tdee, weight, height, age, gender, activity_factor)
+print_with_function_name(get_lbm, height, weight, gender)
+print_with_function_name(get_fat_percentage, gender, age, weight, height)
+print_with_function_name(get_water_percentage, gender, age, weight, height)
+print_with_function_name(get_bone_mass, height, weight, gender)
+print_with_function_name(get_muscle_mass, gender, age, weight, height)
+print_with_function_name(get_protein_percentage, gender, age, weight, height, True)
+print_with_function_name(get_visceral_fat, gender, height, weight, age)
+print_with_function_name(get_ideal_weight, gender, height, True)
+

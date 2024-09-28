@@ -6,3 +6,7 @@ def predict_gender(height, weight):
     prediction = clf_loaded.predict([[height, weight]])
 
     return str(prediction[0])
+
+#height = 170
+#weight = 60
+#print(predict_gender(height,weight))
