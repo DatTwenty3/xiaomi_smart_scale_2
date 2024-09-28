@@ -1,5 +1,12 @@
 from math import floor
+from datetime import datetime
 
+# Tính tuổi dựa trên ngày sinh
+def calculate_age(dob_str):
+    dob = datetime.strptime(dob_str, "%d/%m/%Y")
+    today = datetime.today()
+    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+    return age
 
 def check_val_overflow(value, minimum, maximum):
     if value < minimum:

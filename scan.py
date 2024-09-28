@@ -86,30 +86,16 @@ def input_user_info():
 user_info = input_user_info()
 
 
-# Tính tuổi dựa trên ngày sinh
-def calculate_age(dob_str):
-    dob = datetime.strptime(dob_str, "%d/%m/%Y")
-    today = datetime.today()
-    age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-    return age
-
-
-# Tính BMR và TDEE
-def calculate_bmr_tdee(weight, height, age, gender, activity_factor):
-    if gender == 'male':
-        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
-    else:
-        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
-    tdee = bmr * activity_factor
-    return bmr, tdee
-
 
 # Tạo cửa sổ mới để hiển thị kết quả cân nặng
 root = tk.Tk()
 root.title("Weight and Body Composition")
 
+# Nhãn hiển thị tình trạng kết nối
+connection_status_label = tk.Label(root, text="Trạng thái kết nối: Ngắt kết nối", font=("Helvetica", 12), anchor="w")
+connection_status_label.pack(pady=10, padx=10, fill=tk.X)
 # Thông tin nhập được
-age = calculate_age(user_info['dob'])
+age = mc.calculate_age(user_info['dob'])
 name_label = tk.Label(root,
                       text=f"Tên: {user_info['name']}",
                       font=("Helvetica", 12),
@@ -133,7 +119,6 @@ age_label = tk.Label(root,
                      font=("Helvetica", 12),
                      anchor="w")  # Căn lề trái
 age_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
-
 # Nhãn hiển thị cân nặng
 weight_label = tk.Label(root, text="Cân nặng: -- kg", font=("Helvetica", 12),
                         anchor="w")  # Căn lề trái
@@ -177,13 +162,13 @@ protein_percentage_label = tk.Label(root, text="Phần trăm protein: -- %", fon
                                     anchor="w")  # Căn lề trái
 protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị phần trăm mo noi tang
-protein_percentage_label = tk.Label(root, text="Phần trăm mỡ nội tạng: -- %", font=("Helvetica", 12),
-                                    anchor="w")  # Căn lề trái
-protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+visceral_fat_label = tk.Label(root, text="Phần trăm mỡ nội tạng: -- %", font=("Helvetica", 12),
+                              anchor="w")  # Căn lề trái
+visceral_fat_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 # Nhãn hiển thị cân nặng lý tưởng
-protein_percentage_label = tk.Label(root, text="Cân nặng lý tưởng: -- kg", font=("Helvetica", 12),
-                                    anchor="w")  # Căn lề trái
-protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
+ideal_weight_label = tk.Label(root, text="Cân nặng lý tưởng: -- kg", font=("Helvetica", 12),
+                              anchor="w")  # Căn lề trái
+ideal_weight_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 
 
 async def find_miscale_device():
@@ -191,19 +176,39 @@ async def find_miscale_device():
 
 
 # Nhãn hiển thị đánh giá
-bmi_eval_label = tk.Label(root, text="", font=("Helvetica", 12))
-bmi_eval_label.pack(pady=10)
-bmr_eval_label = tk.Label(root, text="", font=("Helvetica", 12))
-bmr_eval_label.pack(pady=10)
-tdee_eval_label = tk.Label(root, text="", font=("Helvetica", 12))
-tdee_eval_label.pack(pady=10)
+bmi_eval_label = tk.Label(root, text="Đang tiến hành đánh giá BMI ---", font=("Helvetica", 12), anchor="w")
+bmi_eval_label.pack(pady=10, fill=tk.X)
+bmr_eval_label = tk.Label(root, text="Đang tiến hành đánh giá BMR ---", font=("Helvetica", 12), anchor="w")
+bmr_eval_label.pack(pady=10, fill=tk.X)
+tdee_eval_label = tk.Label(root, text="Đang tiến hành đánh giá TDEE ---", font=("Helvetica", 12), anchor="w")
+tdee_eval_label.pack(pady=10, fill=tk.X)
 
 
-# Cập nhật phần đánh giá sau khi tính toán
+#Cập nhật phần đánh giá sau khi tính toán
 def update_evaluation(bmi, bmr, tdee, weight):
     bmi_eval_label.config(text=f"Bạn đang {mc.evaluate_bmi(bmi, user_info['height'], weight)}")
     bmr_eval_label.config(text=f"{mc.evaluate_bmr(bmr)}")
     tdee_eval_label.config(text=f"{mc.evaluate_tdee(tdee)}")
+    return
+
+
+def update_labels(predicted_gender, bmi, bmr, tdee, lbm, fp, wp, bm, ms, pp, vf, iw):
+    if predicted_gender == "male":
+        gender_label.config(text="Nam")
+    else:
+        gender_label.config(text="Nữ")
+    bmi_label.config(text=f"BMI: {bmi:.2f}")
+    bmr_label.config(text=f"BMR: {bmr:.0f} kcal/day")
+    tdee_label.config(text=f"TDEE: {tdee:.0f} kcal/day")
+    lean_mass_label.config(text=f"Khối lượng cơ thể nạc: {lbm:.2f} kg")
+    body_fat_label.config(text=f"Phần trăm mỡ: {fp:.2f} %")
+    water_percentage_label.config(text=f"Phần trăm nước: {wp:.2f} %")
+    bone_mass_label.config(text=f"Khối lượng xương: {bm:.2f} kg")
+    muscle_mass_label.config(text=f"Khối lượng cơ: {ms:.2f} kg")
+    protein_percentage_label.config(text=f"Phần trăm protein: {pp:.2f} %")
+    visceral_fat_label.config(text=f"Phần trăm mỡ nội tạng: {vf:.2f} %")
+    ideal_weight_label.config(text=f"Cân nặng lý tưởng: {iw:.2f} kg")
+    return
 
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
@@ -252,15 +257,8 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         iw = mc.get_ideal_weight(predicted_gender, user_info['height'], True)
         ###########################################CALULATOR AREA#######################################################
         # Cập nhật các nhãn hiển thị
-        if predicted_gender == "male":
-            gender_label.config(text=f"Nam")
-        else:
-            gender_label.config(text=f"Nữ")
-        bmi_label.config(text=f"BMI: {bmi:.2f}")
-        bmr_label.config(text=f"BMR: {bmr:.0f} kcal/day")
-        tdee_label.config(text=f"TDEE: {tdee:.0f} kcal/day")
-
-        # Cập nhật đánh giá
+        update_labels(predicted_gender, bmi, bmr, tdee, lbm, fp, wp, bm, ms, pp, vf, iw)
+        # # Cập nhật đánh giá
         update_evaluation(bmi, bmr, tdee, weight)
 
 
@@ -269,13 +267,16 @@ async def connect_and_measure():
 
     def disconnected_callback(_bleak_client: BleakClient):
         logger.info("disconnected callback")
+        connection_status_label.config(text="Trạng thái kết nối: Đã ngắt kết nối.")
         disconnected_event.set()
 
     device = await find_miscale_device()
     if device:
         logger.info(f"found device: {device.name}")
+        connection_status_label.config(text=f"Trạng thái kết nối: Đã kết nối với thiết bị {device.name}")
     if not device:
         logger.info("no device found")
+        connection_status_label.config(text="Trạng thái kết nối: Không tìm thấy thiết bị")
         return
 
     client = BleakClient(device, disconnected_callback=disconnected_callback)
@@ -289,9 +290,11 @@ async def connect_and_measure():
 
 async def main():
     logger.info("starting scan")
+    connection_status_label.config(text="Trạng thái kết nối: Đang dò thiết bị . . .")
     while True:
         await connect_and_measure()
         logger.info("restarting scan")
+        connection_status_label.config(text="Trạng thái kết nối: Đang dò lại thiết bị . . .")
 
 
 def run_async_main():
