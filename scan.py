@@ -1,11 +1,12 @@
 import asyncio
 import logging
+import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
-from datetime import datetime
 import ai_predict as ap
 import metrics_calculate as mc
+import csv_update as cu
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -14,29 +15,27 @@ BODY_COMPOSITION_MEASUREMENT_UUID = "00002a9d-0000-1000-8000-00805f9b34fb"  # UU
 
 logger = logging.getLogger(__name__)
 
-# Khởi tạo GUI chính
 root = tk.Tk()
-root.withdraw()  # Ẩn cửa sổ chính lúc đầu
+root.withdraw()
 
 
-# Hộp thoại nhập thông tin cá nhân
 class UserInfoDialog(simpledialog.Dialog):
     def body(self, master):
         self.title("Nhập thông tin cá nhân")
 
-        tk.Label(master, text="Tên:").grid(row=0)
-        tk.Label(master, text="Ngày sinh (dd/mm/yyyy):").grid(row=1)
-        tk.Label(master, text="Chiều cao (cm):").grid(row=2)
+        tk.Label(master, text = "Tên:").grid(row = 0)
+        tk.Label(master, text = "Ngày sinh (dd/mm/yyyy):").grid(row = 1)
+        tk.Label(master, text = "Chiều cao (cm):").grid(row = 2)
         # tk.Label(master, text="Giới tính:").grid(row=3)
-        tk.Label(master, text="Hệ số hoạt động:").grid(row=4)
+        tk.Label(master, text = "Hệ số hoạt động:").grid(row = 4)
 
         self.name_entry = tk.Entry(master)
         self.dob_entry = tk.Entry(master)
         self.height_entry = tk.Entry(master)
 
-        self.name_entry.grid(row=0, column=1)
-        self.dob_entry.grid(row=1, column=1)
-        self.height_entry.grid(row=2, column=1)
+        self.name_entry.grid(row = 0, column = 1)
+        self.dob_entry.grid(row = 1, column = 1)
+        self.height_entry.grid(row = 2, column = 1)
 
         # Tạo danh sách thả xuống cho giới tính
         # self.gender_var = tk.StringVar()
@@ -54,12 +53,11 @@ class UserInfoDialog(simpledialog.Dialog):
                                             "Vận động vừa",
                                             "Vận động nhiều",
                                             "Vận động rất nhiều")
-        self.activity_menu.grid(row=4, column=1)
+        self.activity_menu.grid(row = 4, column = 1)
 
         return self.name_entry  # Set focus on tên nhập liệu ban đầu
 
     def apply(self):
-        # Lấy giá trị từ danh sách hệ số hoạt động và chuyển thành số
         activity_factors = {
             "Ít vận động": 1.2,
             "Vận động nhẹ": 1.375,
@@ -76,190 +74,72 @@ class UserInfoDialog(simpledialog.Dialog):
         }
 
 
-# Hiển thị hộp thoại và lấy thông tin
 def input_user_info():
     dialog = UserInfoDialog(root)
     return dialog.result
 
 
-# Nhập thông tin cá nhân
 user_info = input_user_info()
 
-
-
-# Tạo cửa sổ mới để hiển thị kết quả cân nặng
-root = tk.Tk()
-root.title("Weight and Body Composition")
-
-# Nhãn hiển thị tình trạng kết nối
-connection_status_label = tk.Label(root, text="Trạng thái kết nối: Ngắt kết nối", font=("Helvetica", 12), anchor="w")
-connection_status_label.pack(pady=10, padx=10, fill=tk.X)
-# Thông tin nhập được
 age = mc.calculate_age(user_info['dob'])
-name_label = tk.Label(root,
-                      text=f"Tên: {user_info['name']}",
-                      font=("Helvetica", 12),
-                      anchor="w")  # Căn lề trái
-name_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
-
-dob_label = tk.Label(root,
-                     text=f"Ngày sinh: {user_info['dob']}",
-                     font=("Helvetica", 12),
-                     anchor="w")  # Căn lề trái
-dob_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
-
-height_label = tk.Label(root,
-                        text=f"Chiều cao: {user_info['height']:.0f} cm",
-                        font=("Helvetica", 12),
-                        anchor="w")  # Căn lề trái
-height_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
-
-age_label = tk.Label(root,
-                     text=f"Tuổi: {age} tuổi",
-                     font=("Helvetica", 12),
-                     anchor="w")  # Căn lề trái
-age_label.pack(pady=5, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị cân nặng
-weight_label = tk.Label(root, text="Cân nặng: -- kg", font=("Helvetica", 12),
-                        anchor="w")  # Căn lề trái
-weight_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị giới tính
-gender_label = tk.Label(root, text="Giới tính (dự đoán): --", font=("Helvetica", 12),
-                        anchor="w")  # Căn lề trái
-gender_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị BMI, BMR, TDEE
-bmi_label = tk.Label(root, text="BMI: --", font=("Helvetica", 12),
-                     anchor="w")  # Căn lề trái
-bmi_label.pack(pady=10, padx=10, fill=tk.X)
-bmr_label = tk.Label(root, text="BMR: --", font=("Helvetica", 12),
-                     anchor="w")  # Căn lề trái
-bmr_label.pack(pady=10, padx=10, fill=tk.X)
-tdee_label = tk.Label(root, text="TDEE: --", font=("Helvetica", 12),
-                      anchor="w")  # Căn lề trái
-tdee_label.pack(pady=10, padx=10, fill=tk.X)
-# Nhãn hiển thị khối lượng cơ thể nạc
-lean_mass_label = tk.Label(root, text="Khối lượng cơ thể nạc: -- kg", font=("Helvetica", 12),
-                           anchor="w")  # Căn lề trái
-lean_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị phần trăm mỡ
-body_fat_label = tk.Label(root, text="Phần trăm mỡ: -- %", font=("Helvetica", 12),
-                          anchor="w")  # Căn lề trái
-body_fat_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị phần trăm nước
-water_percentage_label = tk.Label(root, text="Phần trăm nước: -- %", font=("Helvetica", 12),
-                                  anchor="w")  # Căn lề trái
-water_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị khối lượng xương
-bone_mass_label = tk.Label(root, text="Khối lượng xương: -- kg", font=("Helvetica", 12),
-                           anchor="w")  # Căn lề trái
-bone_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị khối lượng cơ
-muscle_mass_label = tk.Label(root, text="Khối lượng cơ: -- kg", font=("Helvetica", 12),
-                             anchor="w")  # Căn lề trái
-muscle_mass_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị phần trăm protein
-protein_percentage_label = tk.Label(root, text="Phần trăm protein: -- %", font=("Helvetica", 12),
-                                    anchor="w")  # Căn lề trái
-protein_percentage_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị phần trăm mo noi tang
-visceral_fat_label = tk.Label(root, text="Phần trăm mỡ nội tạng: -- %", font=("Helvetica", 12),
-                              anchor="w")  # Căn lề trái
-visceral_fat_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
-# Nhãn hiển thị cân nặng lý tưởng
-ideal_weight_label = tk.Label(root, text="Cân nặng lý tưởng: -- kg", font=("Helvetica", 12),
-                              anchor="w")  # Căn lề trái
-ideal_weight_label.pack(pady=10, padx=10, fill=tk.X)  # Thêm fill=tk.X
 
 
 async def find_miscale_device():
     return await BleakScanner().find_device_by_name("MI SCALE2")
 
 
-# Nhãn hiển thị đánh giá
-bmi_eval_label = tk.Label(root, text="Đang tiến hành đánh giá BMI ---", font=("Helvetica", 12), anchor="w")
-bmi_eval_label.pack(pady=10, fill=tk.X)
-bmr_eval_label = tk.Label(root, text="Đang tiến hành đánh giá BMR ---", font=("Helvetica", 12), anchor="w")
-bmr_eval_label.pack(pady=10, fill=tk.X)
-tdee_eval_label = tk.Label(root, text="Đang tiến hành đánh giá TDEE ---", font=("Helvetica", 12), anchor="w")
-tdee_eval_label.pack(pady=10, fill=tk.X)
-
-
-#Cập nhật phần đánh giá sau khi tính toán
-def update_evaluation(bmi, bmr, tdee, weight):
-    bmi_eval_label.config(text=f"Bạn đang {mc.evaluate_bmi(bmi, user_info['height'], weight)}")
-    bmr_eval_label.config(text=f"{mc.evaluate_bmr(bmr)}")
-    tdee_eval_label.config(text=f"{mc.evaluate_tdee(tdee)}")
-    return
-
-
-def update_labels(predicted_gender, bmi, bmr, tdee, lbm, fp, wp, bm, ms, pp, vf, iw):
-    if predicted_gender == "male":
-        gender_label.config(text="Nam")
-    else:
-        gender_label.config(text="Nữ")
-    bmi_label.config(text=f"BMI: {bmi:.2f}")
-    bmr_label.config(text=f"BMR: {bmr:.0f} kcal/day")
-    tdee_label.config(text=f"TDEE: {tdee:.0f} kcal/day")
-    lean_mass_label.config(text=f"Khối lượng cơ thể nạc: {lbm:.2f} kg")
-    body_fat_label.config(text=f"Phần trăm mỡ: {fp:.2f} %")
-    water_percentage_label.config(text=f"Phần trăm nước: {wp:.2f} %")
-    bone_mass_label.config(text=f"Khối lượng xương: {bm:.2f} kg")
-    muscle_mass_label.config(text=f"Khối lượng cơ: {ms:.2f} kg")
-    protein_percentage_label.config(text=f"Phần trăm protein: {pp:.2f} %")
-    visceral_fat_label.config(text=f"Phần trăm mỡ nội tạng: {vf:.2f} %")
-    ideal_weight_label.config(text=f"Cân nặng lý tưởng: {iw:.2f} kg")
-    return
-
-
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
-    """Parses body composition data and updates the GUI"""
-    weight = int.from_bytes(data[1:3], byteorder='little') / 200.0
-    if weight >= 10:
+    weight = int.from_bytes(data[1:3], byteorder = 'little') / 200.0
+    if weight >= 30:
         print(f"Weight: {weight} kg")
-        weight_label.config(text=f"Cân nặng: {weight:.2f} kg")  # Update the label in the GUI
 
         ###########################################CALULATOR AREA#######################################################
         # Tính BMI
-        # height_in_meters = user_info['height'] / 100.0
-        # bmi = weight / (height_in_meters ** 2)
         bmi = mc.get_bmi(user_info['height'], weight)
-
         # Dự đoán giới tính
         predicted_gender = ap.predict_gender(user_info['height'], weight)
-
         # Tính BMR và TDEE
-        # bmr, tdee = calculate_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
         bmr, tdee = mc.get_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
-
         # Tinh LBM
         lbm = mc.get_lbm(user_info['height'], weight, predicted_gender)
-
         # Tinh fat percentage
         # fp = mc.get_fat_percentage(predicted_gender, age, weight, user_info['height'])
         fp = ap.predict_body_fat(age, predicted_gender, user_info['height'], weight)
-
         # Tinh water percentage
         wp = mc.get_water_percentage(predicted_gender, age, weight, user_info['height'])
-
         # Tinh bone mass
         bm = mc.get_bone_mass(user_info['height'], weight, predicted_gender)
-
         # Tinh muscle mass
         ms = mc.get_muscle_mass(predicted_gender, age, weight, user_info['height'])
-
         # Tinh protein percentage
         pp = mc.get_protein_percentage(predicted_gender, age, weight, user_info['height'], True)
-
         # Tinh mo noi tang
         vf = mc.get_visceral_fat(predicted_gender, user_info['height'], weight, age)
-
         # Tinh can nang ly tuong
         iw = mc.get_ideal_weight(predicted_gender, user_info['height'], True)
         ###########################################CALULATOR AREA#######################################################
-        # Cập nhật các nhãn hiển thị
-        update_labels(predicted_gender, bmi, bmr, tdee, lbm, fp, wp, bm, ms, pp, vf, iw)
-        # # Cập nhật đánh giá
-        update_evaluation(bmi, bmr, tdee, weight)
+        user_info_csv = {
+            'name': user_info['name'],
+            'height': user_info['height'],
+            'activity_factor': user_info['activity_factor']
+        }
+        measurements = {
+            'gender': predicted_gender,
+            'weight': weight,
+            'age': age,
+            'bmi': bmi,
+            'bmr': bmr,
+            'tdee': tdee,
+            'lbm': lbm,
+            'fp': fp,
+            'wp': wp,
+            'bm': bm,
+            'ms': ms,
+            'pp': pp,
+            'vf': vf,
+            'iw': iw
+        }
+        cu.update_csv(user_info_csv, measurements)
 
 
 async def connect_and_measure():
@@ -267,19 +147,16 @@ async def connect_and_measure():
 
     def disconnected_callback(_bleak_client: BleakClient):
         logger.info("disconnected callback")
-        connection_status_label.config(text="Trạng thái kết nối: Đã ngắt kết nối.")
         disconnected_event.set()
 
     device = await find_miscale_device()
     if device:
         logger.info(f"found device: {device.name}")
-        connection_status_label.config(text=f"Trạng thái kết nối: Đã kết nối với thiết bị {device.name}")
     if not device:
         logger.info("no device found")
-        connection_status_label.config(text="Trạng thái kết nối: Không tìm thấy thiết bị")
         return
 
-    client = BleakClient(device, disconnected_callback=disconnected_callback)
+    client = BleakClient(device, disconnected_callback = disconnected_callback)
 
     async with client:
         await client.start_notify(
@@ -290,11 +167,9 @@ async def connect_and_measure():
 
 async def main():
     logger.info("starting scan")
-    connection_status_label.config(text="Trạng thái kết nối: Đang dò thiết bị . . .")
     while True:
         await connect_and_measure()
         logger.info("restarting scan")
-        connection_status_label.config(text="Trạng thái kết nối: Đang dò lại thiết bị . . .")
 
 
 def run_async_main():
@@ -305,14 +180,15 @@ def run_async_main():
 
 if __name__ == "__main__":
     logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)-15s %(name)-8s %(levelname)s: %(message)s",
+        level = logging.INFO,
+        format = "%(asctime)-15s %(name)-8s %(levelname)s: %(message)s",
     )
 
-    # Run the asyncio code in a separate thread so nó doesn't block the GUI
-    import threading
+    threading.Thread(target = run_async_main, daemon = True).start()
 
-    threading.Thread(target=run_async_main, daemon=True).start()
-
-    # Start the Tkinter main loop
-    root.mainloop()
+    try:
+        root.mainloop()
+    except KeyboardInterrupt:
+        logger.info("Application terminated by user")
+    finally:
+        logger.info("Cleaning up resources")
