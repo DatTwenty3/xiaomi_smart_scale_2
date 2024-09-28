@@ -7,6 +7,7 @@ from tkinter import simpledialog
 import ai_predict as ap
 import metrics_calculate as mc
 import csv_update as cu
+import pandas as pd
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -23,29 +24,33 @@ class UserInfoDialog(simpledialog.Dialog):
     def body(self, master):
         self.title("Nhập thông tin cá nhân")
 
-        tk.Label(master, text = "Tên:").grid(row = 0)
+        tk.Label(master, text = "Tạo mới hoặc chọn tên người dùng:").grid(row = 0, column = 0)
+
+        # Tạo danh sách tên từ file CSV, loại bỏ tên trùng
+        self.user_data = pd.read_csv('user_data/user_data.csv')
+        self.user_data = self.user_data.drop_duplicates(subset = 'name')  # Loại bỏ tên trùng
+        self.names = self.user_data['name'].tolist()
+
+        # Tạo ComboBox để chọn tên người dùng
+        self.name_var = tk.StringVar()
+        self.name_menu = ttk.Combobox(master, textvariable = self.name_var, values = self.names)
+        self.name_menu.grid(row = 0, column = 1)
+        self.name_menu.bind("<<ComboboxSelected>>", self.on_name_select)
+
+        # Các trường nhập liệu khác
         tk.Label(master, text = "Ngày sinh (dd/mm/yyyy):").grid(row = 1)
         tk.Label(master, text = "Chiều cao (cm):").grid(row = 2)
-        # tk.Label(master, text="Giới tính:").grid(row=3)
-        tk.Label(master, text = "Hệ số hoạt động:").grid(row = 4)
+        tk.Label(master, text = "Hệ số hoạt động:").grid(row = 3)
 
-        self.name_entry = tk.Entry(master)
         self.dob_entry = tk.Entry(master)
         self.height_entry = tk.Entry(master)
 
-        self.name_entry.grid(row = 0, column = 1)
         self.dob_entry.grid(row = 1, column = 1)
         self.height_entry.grid(row = 2, column = 1)
 
-        # Tạo danh sách thả xuống cho giới tính
-        # self.gender_var = tk.StringVar()
-        # self.gender_var.set("Nam")  # Giá trị mặc định
-        # self.gender_menu = ttk.OptionMenu(master, self.gender_var, "Nam", "Nam", "Nữ")
-        # self.gender_menu.grid(row=3, column=1)
-
         # Tạo danh sách thả xuống cho hệ số hoạt động
         self.activity_var = tk.StringVar()
-        self.activity_var.set("Ít vận động (1.2)")  # Giá trị mặc định
+        self.activity_var.set("Ít vận động")  # Giá trị mặc định
         self.activity_menu = ttk.OptionMenu(master, self.activity_var,
                                             "Ít vận động",
                                             "Ít vận động",
@@ -53,9 +58,31 @@ class UserInfoDialog(simpledialog.Dialog):
                                             "Vận động vừa",
                                             "Vận động nhiều",
                                             "Vận động rất nhiều")
-        self.activity_menu.grid(row = 4, column = 1)
+        self.activity_menu.grid(row = 3, column = 1)
 
-        return self.name_entry  # Set focus on tên nhập liệu ban đầu
+        return self.name_menu  # Set focus on ComboBox
+
+    def on_name_select(self, event):
+        selected_name = self.name_var.get()
+        user_info = self.user_data[self.user_data['name'] == selected_name]
+
+        if not user_info.empty:
+            self.dob_entry.delete(0, tk.END)
+            self.height_entry.delete(0, tk.END)
+
+            # Điền thông tin tương ứng
+            self.dob_entry.insert(0, user_info['dob'].values[0])
+            self.height_entry.insert(0, user_info['height'].values[0])
+            # Cập nhật hệ số hoạt động tương ứng
+            activity_mapping = {
+                1.2: "Ít vận động",
+                1.375: "Vận động nhẹ",
+                1.55: "Vận động vừa",
+                1.725: "Vận động nhiều",
+                1.9: "Vận động rất nhiều"
+            }
+            activity_factor = user_info['activity_factor'].values[0]
+            self.activity_var.set(activity_mapping[activity_factor])
 
     def apply(self):
         activity_factors = {
@@ -66,12 +93,12 @@ class UserInfoDialog(simpledialog.Dialog):
             "Vận động rất nhiều": 1.9
         }
         self.result = {
-            "name": self.name_entry.get(),
+            "name": self.name_var.get(),
             "dob": self.dob_entry.get(),
             "height": float(self.height_entry.get()),
-            # "gender": self.gender_var.get().lower(),
             "activity_factor": activity_factors[self.activity_var.get()]
         }
+
 
 
 def input_user_info():
@@ -82,7 +109,6 @@ def input_user_info():
 user_info = input_user_info()
 
 age = mc.calculate_age(user_info['dob'])
-
 
 async def find_miscale_device():
     return await BleakScanner().find_device_by_name("MI SCALE2")
@@ -118,11 +144,11 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         # Tinh can nang ly tuong
         iw = mc.get_ideal_weight(predicted_gender, user_info['height'], True)
         ###########################################CALULATOR AREA#######################################################
-        user_info_csv = {
-            'name': user_info['name'],
-            'height': user_info['height'],
-            'activity_factor': user_info['activity_factor']
-        }
+        # user_info_csv = {
+        #     'name': user_info['name'],
+        #     'height': user_info['height'],
+        #     'activity_factor': user_info['activity_factor']
+        # }
         measurements = {
             'gender': predicted_gender,
             'weight': weight,
@@ -139,7 +165,7 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
             'vf': vf,
             'iw': iw
         }
-        cu.update_csv(user_info_csv, measurements)
+        cu.update_csv(user_info, measurements)
 
 
 async def connect_and_measure():

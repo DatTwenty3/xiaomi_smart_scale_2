@@ -7,12 +7,11 @@ file_path = 'user_data/user_data.csv'
 def update_csv(user_info, measurements):
     # Danh sách tiêu đề cột
     headers = [
-        "date", "name", "age", "gender", "height", "weight", "activity_factor",
+        "date", "name", "age", "gender", "height", "weight", "dob", "activity_factor",
         "bmi", "bmr", "tdee", "lean_body_mass", "fat_percentage",
         "water_percentage", "bone_mass", "muscle_mass", "protein_percentage", "visceral_fat", "ideal_weight"
     ]
 
-    # Tạo một danh sách chứa dữ liệu cần ghi vào CSV
     row = [
         datetime.now().strftime("%d/%m/%Y"),  # Ngày hiện tại
         user_info['name'],
@@ -20,6 +19,7 @@ def update_csv(user_info, measurements):
         measurements['gender'],
         user_info['height'],
         measurements['weight'],
+        user_info['dob'],
         user_info['activity_factor'],
         measurements['bmi'],
         measurements['bmr'],
@@ -49,27 +49,28 @@ def update_csv(user_info, measurements):
         writer.writerow(row)
 
 
-user_info = {
-    'name': 'Le Dat',
-    'height': 166,
-    'activity_factor': 1.55
-}
-
-measurements = {
-    'gender':'male',
-    'weight': 70.0,
-    'age': 30,
-    'bmi': 22.5,
-    'bmr': 1500,
-    'tdee': 2000,
-    'lbm': 60.0,
-    'fp': 15.0,
-    'wp': 50.0,
-    'bm': 5.0,
-    'ms': 25.0,
-    'pp': 18.0,
-    'vf': 10.0,
-    'iw': 65.0
-}
-
-update_csv(user_info, measurements)
+# user_info = {
+#     'name': 'Le Dat',
+#     'height': 166,
+#     'activity_factor': 1.55,
+#     'dob': 230999
+# }
+#
+# measurements = {
+#     'gender':'male',
+#     'weight': 70.0,
+#     'age': 30,
+#     'bmi': 22.5,
+#     'bmr': 1500,
+#     'tdee': 2000,
+#     'lbm': 60.0,
+#     'fp': 15.0,
+#     'wp': 50.0,
+#     'bm': 5.0,
+#     'ms': 25.0,
+#     'pp': 18.0,
+#     'vf': 10.0,
+#     'iw': 65.0
+# }
+#
+# update_csv(user_info, measurements)
