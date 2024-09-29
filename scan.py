@@ -4,6 +4,8 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
+
+import ai_predict
 import ai_predict as ap
 import metrics_calculate as mc
 import csv_update as cu
@@ -110,8 +112,10 @@ user_info = input_user_info()
 
 age = mc.calculate_age(user_info['dob'])
 
+sex = ai_predict.predict_gender(user_info['height'], 77.1)
+
 measurements = {
-    'gender':'male',
+    'gender': sex,
     'weight': 70.0,
     'age': 30,
     'bmi': 22.5,
