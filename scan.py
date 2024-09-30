@@ -97,7 +97,7 @@ class UserInfoDialog(simpledialog.Dialog):
         self.result = {
             "name": self.name_var.get(),
             "dob": self.dob_entry.get(),
-            "height": self.height_entry.get(),
+            "height": int(self.height_entry.get()),
             "activity_factor": activity_factors[self.activity_var.get()]
         }
 
@@ -112,26 +112,26 @@ user_info = input_user_info()
 
 age = mc.calculate_age(user_info['dob'])
 
-sex = ai_predict.predict_gender(user_info['height'], 40)
-
-measurements = {
-    'gender': sex,
-    'weight': 70.0,
-    'age': age,
-    'bmi': 22.5,
-    'bmr': 1500,
-    'tdee': 2000,
-    'lbm': 60.0,
-    'fp': 15.0,
-    'wp': 50.0,
-    'bm': 5.0,
-    'ms': 25.0,
-    'pp': 18.0,
-    'vf': 10.0,
-    'iw': 65.0
-}
-
-cu.update_csv(user_info, measurements)
+# sex = ai_predict.predict_gender(user_info['height'], 40)
+#
+# measurements = {
+#     'gender': sex,
+#     'weight': 70.0,
+#     'age': age,
+#     'bmi': 22.5,
+#     'bmr': 1500,
+#     'tdee': 2000,
+#     'lbm': 60.0,
+#     'fp': 15.0,
+#     'wp': 50.0,
+#     'bm': 5.0,
+#     'ms': 25.0,
+#     'pp': 18.0,
+#     'vf': 10.0,
+#     'iw': 65.0
+# }
+#
+# cu.update_csv(user_info, measurements)
 
 async def find_miscale_device():
     return await BleakScanner().find_device_by_name("MI SCALE2")

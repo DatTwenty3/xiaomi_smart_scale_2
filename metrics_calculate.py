@@ -18,8 +18,8 @@ def check_val_overflow(value, minimum, maximum):
 
 
 def get_bmi(height, weight):
-    height_in_meters = height / 100.0
-    return weight / (height_in_meters ** 2)
+    height_in_meters = height / 100
+    return round(weight / (height_in_meters ** 2), 2)
 
 
 def get_bmr_tdee(weight, height, age, gender, activity_factor):
@@ -28,7 +28,7 @@ def get_bmr_tdee(weight, height, age, gender, activity_factor):
     else:
         bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
     tdee = bmr * activity_factor
-    return bmr, tdee
+    return round(bmr, 2), round(tdee, 2)
 
 
 # Hàm đánh giá dựa trên chỉ số BMI
@@ -62,9 +62,11 @@ def evaluate_tdee(tdee):
 
 def get_lbm(height, weight, gender):
     if gender == 'male':
-        return (0.32810 * weight) + (0.33929 * height) - 29.5336
+        lbm = (0.32810 * weight) + (0.33929 * height) - 29.5336
+        return round(lbm, 2)
     else:
-        return (0.29569 * weight) + (0.41813 * height) - 43.2933
+        lbm = (0.29569 * weight) + (0.41813 * height) - 43.2933
+        return round(lbm, 2)
 
 
 def get_fat_percentage(gender, age, weight, height):
@@ -98,6 +100,8 @@ def get_fat_percentage(gender, age, weight, height):
     if fat_percentage > 63:
         fat_percentage = 75
 
+    round(fat_percentage, 2)
+
     return check_val_overflow(fat_percentage, 5, 75)
 
 
@@ -113,7 +117,10 @@ def get_water_percentage(gender, age, weight, height):
     if water_percentage * coefficient >= 65:
         water_percentage = 75
 
-    return check_val_overflow(water_percentage * coefficient, 35, 75)
+    water_percentage = water_percentage * coefficient
+    water_percentage = round(water_percentage, 2)
+
+    return check_val_overflow(water_percentage, 35, 75)
 
 
 def get_bone_mass(height, weight, gender):
@@ -136,6 +143,8 @@ def get_bone_mass(height, weight, gender):
     elif gender == 'male' and bone_mass > 5.2:
         bone_mass = 8
 
+    bone_mass = round(bone_mass, 2)
+
     return check_val_overflow(bone_mass, 0.5, 8)
 
 
@@ -150,6 +159,8 @@ def get_muscle_mass(gender, age, weight, height):
     elif gender == 'male' and muscle_mass >= 93.5:
         muscle_mass = 120
 
+    muscle_mass = round(muscle_mass, 2)
+
     return check_val_overflow(muscle_mass, 10, 120)
 
 
@@ -162,6 +173,8 @@ def get_protein_percentage(gender, age, weight, height, orig=True):
         protein_percentage = 100 - (floor(get_fat_percentage(gender, age, weight, height) * 100) / 100)
         protein_percentage -= floor(get_water_percentage(gender, age, weight, height) * 100) / 100
         protein_percentage -= floor((get_bone_mass(height, weight, gender) / weight * 100) * 100) / 100
+
+    protein_percentage = round(protein_percentage, 2)
 
     return check_val_overflow(protein_percentage, 5, 32)
 
@@ -183,17 +196,23 @@ def get_visceral_fat(gender, height, weight, age):
             sub_calc = 0.765 + height * -0.0015
             visceral_fat = (((height * 0.143) - (weight * sub_calc)) * -1) + (age * 0.15) - 5.0
 
+    visceral_fat = round(visceral_fat, 2)
+
     return check_val_overflow(visceral_fat, 1, 50)
 
 
 def get_ideal_weight(gender, height, orig=True):
     # Uses mi fit algorithm (or holtek's one)
     if orig and gender == 'female':
-        return (height - 70) * 0.6
+        ideal_weight = (height - 70) * 0.6
+        return round(ideal_weight, 2)
     elif orig and gender == 'male':
-        return (height - 80) * 0.7
+        ideal_weight = (height - 80) * 0.7
+        return round(ideal_weight, 2)
     else:
-        return check_val_overflow((22 * height) * height / 10000, 5.5, 198)
+        ideal_weight = (22 * height) * height / 10000
+        ideal_weight = round(ideal_weight, 2)
+        return check_val_overflow(ideal_weight, 5.5, 198)
 
 # gender = 'male'
 # age = 25
