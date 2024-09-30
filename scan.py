@@ -112,12 +112,12 @@ user_info = input_user_info()
 
 age = mc.calculate_age(user_info['dob'])
 
-sex = ai_predict.predict_gender(user_info['height'], 77.1)
+sex = ai_predict.predict_gender(user_info['height'], 40)
 
 measurements = {
     'gender': sex,
     'weight': 70.0,
-    'age': 30,
+    'age': age,
     'bmi': 22.5,
     'bmr': 1500,
     'tdee': 2000,

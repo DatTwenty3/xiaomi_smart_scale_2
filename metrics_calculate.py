@@ -195,16 +195,16 @@ def get_ideal_weight(gender, height, orig=True):
     else:
         return check_val_overflow((22 * height) * height / 10000, 5.5, 198)
 
-# gender = 'male'
-# age = 25
-# weight = 77.7
-# height = 166
-# activity_factor = 1.55
-#
-#
-# def print_with_function_name(func, *args):
-#     result = func(*args)
-#     print(f"Calling {func.__name__} with result: {result}")
+gender = 'male'
+age = 25
+weight = 77.7
+height = 166
+activity_factor = 1.55
+
+
+def print_with_function_name(func, *args):
+    result = func(*args)
+    print(f"Calling {func.__name__} with result: {result}")
 
 
 # print_with_function_name(get_bmi, height, weight)
@@ -216,4 +216,4 @@ def get_ideal_weight(gender, height, orig=True):
 # print_with_function_name(get_muscle_mass, gender, age, weight, height)
 # print_with_function_name(get_protein_percentage, gender, age, weight, height, True)
 # print_with_function_name(get_visceral_fat, gender, height, weight, age)
-# print_with_function_name(get_ideal_weight, gender, height, True)
+print_with_function_name(get_ideal_weight, gender, height, True)
