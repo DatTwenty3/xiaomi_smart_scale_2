@@ -96,9 +96,10 @@ class UserInfoDialog(simpledialog.Dialog):
             "name": self.name_var.get(),
             "dob": self.dob_entry.get(),
             "height": int(self.height_entry.get()),
+            "weight": 0,
+            "age": 0,
             "activity_factor": activity_factors[self.activity_var.get()]
         }
-
 
 
 def input_user_info():
@@ -108,23 +109,24 @@ def input_user_info():
 
 user_info = input_user_info()
 
-age = cm.calculate_age(user_info['dob'])
+user_info['age'] = cm.calculate_age(user_info['dob'])
+
 
 async def find_miscale_device():
     return await BleakScanner().find_device_by_name("MI SCALE2")
 
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
-    weight = int.from_bytes(data[1:3], byteorder = 'little') / 200.0
-    if weight >= 30:
-        print(f"Cân nặng: {weight} kg")
+    user_info['weight'] = int.from_bytes(data[1:3], byteorder = 'little')/200
+    if cbc.is_meaningful_weight(user_info):
+        print(f"Cân nặng: {user_info['weight']} kg")
         ###########################################CALULATOR AREA#######################################################
-        body_composition = cbc.calculate_body_metrics(user_info, weight, age)
+        body_composition = cbc.calculate_body_metrics(user_info)
         ###########################################CALULATOR AREA#######################################################
         measurements = {
             'gender': body_composition['gender'],
-            'weight': weight,
-            'age': age,
+            'weight': user_info['weight'],
+            'age': user_info['age'],
             'bmi': body_composition['bmi'],
             'bmr': body_composition['bmr'],
             'tdee': body_composition['tdee'],
@@ -138,6 +140,7 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
             'iw': body_composition['Ideal Weight']
         }
         cu.update_csv(user_info, measurements)
+        print('Đã cập nhật vào file CSV !')
 
 
 async def connect_and_measure():

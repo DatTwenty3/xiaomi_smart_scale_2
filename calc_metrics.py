@@ -213,26 +213,3 @@ def get_ideal_weight(gender, height, orig=True):
         ideal_weight = (22 * height) * height / 10000
         ideal_weight = round(ideal_weight, 2)
         return check_val_overflow(ideal_weight, 5.5, 198)
-
-# gender = 'male'
-# age = 25
-# weight = 77.7
-# height = 166
-# activity_factor = 1.55
-#
-#
-# def print_with_function_name(func, *args):
-#     result = func(*args)
-#     print(f"Calling {func.__name__} with result: {result}")
-
-
-# print_with_function_name(get_bmi, height, weight)
-# print_with_function_name(get_bmr_tdee, weight, height, age, gender, activity_factor)
-# print_with_function_name(get_lbm, height, weight, gender)
-# print_with_function_name(get_fat_percentage, gender, age, weight, height)
-# print_with_function_name(get_water_percentage, gender, age, weight, height)
-# print_with_function_name(get_bone_mass, height, weight, gender)
-# print_with_function_name(get_muscle_mass, gender, age, weight, height)
-# print_with_function_name(get_protein_percentage, gender, age, weight, height, True)
-# print_with_function_name(get_visceral_fat, gender, height, weight, age)
-# print_with_function_name(get_ideal_weight, gender, height, True)
