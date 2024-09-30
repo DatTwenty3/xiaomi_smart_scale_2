@@ -8,7 +8,8 @@ def calculate_body_metrics(user_info):
     # Dự đoán giới tính
     predicted_gender = ap.predict_gender(user_info['height'], user_info['weight'])
     # Tính BMR và TDEE
-    bmr, tdee = cm.get_bmr_tdee(user_info['weight'], user_info['height'], user_info['age'], predicted_gender, user_info['activity_factor'])
+    bmr, tdee = cm.get_bmr_tdee(user_info['weight'], user_info['height'], user_info['age'], predicted_gender,
+                                user_info['activity_factor'])
     # Tính LBM (Lean Body Mass)
     lbm = cm.get_lbm(user_info['height'], user_info['weight'], predicted_gender)
     # Tính fat percentage (phần trăm mỡ)

@@ -10,10 +10,6 @@ def predict_gender(height_cm, weight_kg):
     return str(prediction[0])
 
 
-# height = 170
-# weight = 60
-# print(predict_gender(height,weight))
-
 def predict_body_fat(age, gender, height_cm, weight_kg):
     model_loaded = load('pkl/body_fat.pkl')
 
@@ -28,7 +24,3 @@ def predict_body_fat(age, gender, height_cm, weight_kg):
     prediction = model_loaded.predict(input_data)
 
     return round(prediction[0], 2)
-
-
-# result = predict_body_fat(27, 'male', 164, 61.3)
-# print(f"Predicted body fat: {result}")
