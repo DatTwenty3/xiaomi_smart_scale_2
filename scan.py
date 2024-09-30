@@ -4,12 +4,10 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import simpledialog
-
-import ai_predict
-import ai_predict as ap
-import metrics_calculate as mc
+import calc_metrics as cm
 import csv_update as cu
 import pandas as pd
+import calc_body_composition as cbc
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -110,28 +108,7 @@ def input_user_info():
 
 user_info = input_user_info()
 
-age = mc.calculate_age(user_info['dob'])
-
-# sex = ai_predict.predict_gender(user_info['height'], 40)
-#
-# measurements = {
-#     'gender': sex,
-#     'weight': 70.0,
-#     'age': age,
-#     'bmi': 22.5,
-#     'bmr': 1500,
-#     'tdee': 2000,
-#     'lbm': 60.0,
-#     'fp': 15.0,
-#     'wp': 50.0,
-#     'bm': 5.0,
-#     'ms': 25.0,
-#     'pp': 18.0,
-#     'vf': 10.0,
-#     'iw': 65.0
-# }
-#
-# cu.update_csv(user_info, measurements)
+age = cm.calculate_age(user_info['dob'])
 
 async def find_miscale_device():
     return await BleakScanner().find_device_by_name("MI SCALE2")
@@ -140,53 +117,25 @@ async def find_miscale_device():
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
     weight = int.from_bytes(data[1:3], byteorder = 'little') / 200.0
     if weight >= 30:
-        print(f"Weight: {weight} kg")
-
+        print(f"Cân nặng: {weight} kg")
         ###########################################CALULATOR AREA#######################################################
-        # Tính BMI
-        bmi = mc.get_bmi(user_info['height'], weight)
-        # Dự đoán giới tính
-        predicted_gender = ap.predict_gender(user_info['height'], weight)
-        # Tính BMR và TDEE
-        bmr, tdee = mc.get_bmr_tdee(weight, user_info['height'], age, predicted_gender, user_info['activity_factor'])
-        # Tinh LBM
-        lbm = mc.get_lbm(user_info['height'], weight, predicted_gender)
-        # Tinh fat percentage
-        # fp = mc.get_fat_percentage(predicted_gender, age, weight, user_info['height'])
-        fp = ap.predict_body_fat(age, predicted_gender, user_info['height'], weight)
-        # Tinh water percentage
-        wp = mc.get_water_percentage(predicted_gender, age, weight, user_info['height'])
-        # Tinh bone mass
-        bm = mc.get_bone_mass(user_info['height'], weight, predicted_gender)
-        # Tinh muscle mass
-        ms = mc.get_muscle_mass(predicted_gender, age, weight, user_info['height'])
-        # Tinh protein percentage
-        pp = mc.get_protein_percentage(predicted_gender, age, weight, user_info['height'], True)
-        # Tinh mo noi tang
-        vf = mc.get_visceral_fat(predicted_gender, user_info['height'], weight, age)
-        # Tinh can nang ly tuong
-        iw = mc.get_ideal_weight(predicted_gender, user_info['height'], True)
+        body_composition = cbc.calculate_body_metrics(user_info, weight, age)
         ###########################################CALULATOR AREA#######################################################
-        # user_info_csv = {
-        #     'name': user_info['name'],
-        #     'height': user_info['height'],
-        #     'activity_factor': user_info['activity_factor']
-        # }
         measurements = {
-            'gender': predicted_gender,
+            'gender': body_composition['gender'],
             'weight': weight,
             'age': age,
-            'bmi': bmi,
-            'bmr': bmr,
-            'tdee': tdee,
-            'lbm': lbm,
-            'fp': fp,
-            'wp': wp,
-            'bm': bm,
-            'ms': ms,
-            'pp': pp,
-            'vf': vf,
-            'iw': iw
+            'bmi': body_composition['bmi'],
+            'bmr': body_composition['bmr'],
+            'tdee': body_composition['tdee'],
+            'lbm': body_composition['lbm'],
+            'fp': body_composition['Fat Percentage'],
+            'wp': body_composition['Water Percentage'],
+            'bm': body_composition['Bone Mass'],
+            'ms': body_composition['Muscle Mass'],
+            'pp': body_composition['Protein Percentage'],
+            'vf': body_composition['Visceral Fat'],
+            'iw': body_composition['Ideal Weight']
         }
         cu.update_csv(user_info, measurements)
 
