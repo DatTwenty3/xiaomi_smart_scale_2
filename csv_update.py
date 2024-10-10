@@ -47,7 +47,8 @@ def update_csv(user_info, measurements):
 
         # Ghi dòng dữ liệu
         writer.writerow(row)
-
+    print('Đã cập nhật vào file CSV !')
+    return
 
 # user_info = {
 #     'name': 'Le Dat',

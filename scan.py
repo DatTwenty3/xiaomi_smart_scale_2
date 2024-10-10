@@ -12,7 +12,8 @@ import calc_body_composition as cbc
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 
-BODY_COMPOSITION_MEASUREMENT_UUID = "00002a9d-0000-1000-8000-00805f9b34fb"  # UUID for the Weight Measurement characteristic
+# BODY_COMPOSITION_MEASUREMENT_UUID = "00002a9d-0000-1000-8000-00805f9b34fb"  # UUID for the Weight Measurement characteristic Mi Scale 2
+BODY_COMPOSITION_MEASUREMENT_UUID = "0000FFB2-0000-1000-8000-00805F9B34FB"  # UUID for the Weight Measurement characteristic Crenot Gofit S2
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ class UserInfoDialog(simpledialog.Dialog):
             "name": self.name_var.get(),
             "dob": self.dob_entry.get(),
             "height": int(self.height_entry.get()),
-            "weight": 0,
+            "weight": 75.70,
             "age": 0,
             "activity_factor": activity_factors[self.activity_var.get()]
         }
@@ -111,14 +112,39 @@ user_info = input_user_info()
 
 user_info['age'] = cm.calculate_age(user_info['dob'])
 
+###########################################TEST CALULATOR AREA#######################################################
+# body_composition = cbc.calculate_body_metrics(user_info)
+# measurements = {
+#     'gender': body_composition['gender'],
+#     'weight': user_info['weight'],
+#     'age': user_info['age'],
+#     'bmi': body_composition['bmi'],
+#     'bmr': body_composition['bmr'],
+#     'tdee': body_composition['tdee'],
+#     'lbm': body_composition['lbm'],
+#     'fp': body_composition['Fat Percentage'],
+#     'wp': body_composition['Water Percentage'],
+#     'bm': body_composition['Bone Mass'],
+#     'ms': body_composition['Muscle Mass'],
+#     'pp': body_composition['Protein Percentage'],
+#     'vf': body_composition['Visceral Fat'],
+#     'iw': body_composition['Ideal Weight']
+# }
+# cu.update_csv(user_info, measurements)
+###########################################TEST CALULATOR AREA#######################################################
 
 async def find_miscale_device():
-    return await BleakScanner().find_device_by_name("MI SCALE2")
-
+    # return await BleakScanner().find_device_by_name("MI SCALE2")
+    return await BleakScanner().find_device_by_name("Crenot Gofit S2")
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
-    user_info['weight'] = int.from_bytes(data[1:3], byteorder = 'little')/200
+    #######Crenot Gofit S2#######
+    hex_string = data.hex()  # Chuyển bytearray thành chuỗi hex
+    weight = round(float((int(hex_string[13:18], 16) - 524288) / 1000), 2)
+    #######Crenot Gofit S2#######
+    # weight = int.from_bytes(data[1:3], byteorder = 'little')/200
     if cbc.is_meaningful_weight(user_info):
+        user_info['weight'] = weight
         print(f"Cân nặng: {user_info['weight']} kg")
         ###########################################CALULATOR AREA#######################################################
         body_composition = cbc.calculate_body_metrics(user_info)
@@ -140,7 +166,6 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
             'iw': body_composition['Ideal Weight']
         }
         cu.update_csv(user_info, measurements)
-        print('Đã cập nhật vào file CSV !')
 
 
 async def connect_and_measure():
