@@ -143,7 +143,8 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
     weight = round(float((int(hex_string[13:18], 16) - 524288) / 1000), 2)
     #######Crenot Gofit S2#######
     # weight = int.from_bytes(data[1:3], byteorder = 'little')/200
-    if cbc.is_meaningful_weight(user_info):
+
+    if cbc.is_meaningful_weight(user_info, weight):
         user_info['weight'] = weight
         print(f"Cân nặng: {user_info['weight']} kg")
         ###########################################CALULATOR AREA#######################################################

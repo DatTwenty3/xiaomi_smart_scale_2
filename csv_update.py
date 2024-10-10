@@ -1,19 +1,19 @@
 import csv
 import os
 from datetime import datetime
+import pandas as pd
 
 file_path = 'user_data/user_data.csv'
 
 def update_csv(user_info, measurements):
-    # Danh sách tiêu đề cột
     headers = [
-        "date", "name", "age", "gender", "height", "weight", "dob", "activity_factor",
+        "datetime", "name", "age", "gender", "height", "weight", "dob", "activity_factor",
         "bmi", "bmr", "tdee", "lean_body_mass", "fat_percentage",
         "water_percentage", "bone_mass", "muscle_mass", "protein_percentage", "visceral_fat", "ideal_weight"
     ]
 
     row = [
-        datetime.now().strftime("%d/%m/%Y"),  # Ngày hiện tại
+        datetime.now().strftime("%d/%m/%Y %H:%M"),
         user_info['name'],
         measurements['age'],
         measurements['gender'],
@@ -34,18 +34,14 @@ def update_csv(user_info, measurements):
         measurements['iw']
     ]
 
-    # Kiểm tra xem file có tồn tại không
     file_exists = os.path.isfile(file_path)
 
-    # Mở file CSV và ghi dữ liệu vào
     with open(file_path, mode = 'a', newline = '') as file:
         writer = csv.writer(file)
 
-        # Nếu file không tồn tại, ghi tiêu đề cột
         if not file_exists:
             writer.writerow(headers)
 
-        # Ghi dòng dữ liệu
         writer.writerow(row)
     print('Đã cập nhật vào file CSV !')
     return
