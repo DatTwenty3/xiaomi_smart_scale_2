@@ -49,8 +49,8 @@ def run_dashboard(csv_file, name):
 
         # Tạo biểu đồ cho các thông số
         weight_fig = create_graph(df, 'weight', 'Biểu Đồ Cân Nặng Theo Thời Gian', 'Chỉ số Cân Nặng')
-        bmi_fig = create_graph(df, 'bmi', 'Biểu Đồ BMI Theo Thời Gian','Chỉ số Cân BMI')
-        bmr_fig = create_graph(df, 'bmr', 'Biểu Đồ BMR Theo Thời Gian','Chỉ số Cân BMR')
+        bmi_fig = create_graph(df, 'bmi', 'Biểu Đồ BMI Theo Thời Gian','Chỉ số BMI')
+        bmr_fig = create_graph(df, 'bmr', 'Biểu Đồ BMR Theo Thời Gian','Chỉ số BMR')
 
         # Lấy dữ liệu mới nhất
         latest = df.iloc[-1]  # Dòng cuối cùng
