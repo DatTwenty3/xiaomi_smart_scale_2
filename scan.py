@@ -8,7 +8,7 @@ import calc_metrics as cm
 import csv_update as cu
 import pandas as pd
 import calc_body_composition as cbc
-
+import info_user as iu
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 
@@ -19,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 root = tk.Tk()
 root.withdraw()
+
+health_data = iu.HealthDataManager()
 
 
 class UserInfoDialog(simpledialog.Dialog):
@@ -98,7 +100,7 @@ class UserInfoDialog(simpledialog.Dialog):
             "dob": self.dob_entry.get(),
             "height": int(self.height_entry.get()),
             "weight": 75.70,
-            "age": 0,
+            "age": cm.calculate_age(self.dob_entry.get()),
             "activity_factor": activity_factors[self.activity_var.get()]
         }
 
@@ -108,9 +110,11 @@ def input_user_info():
     return dialog.result
 
 
-user_info = input_user_info()
+health_data.set_user_info(input_user_info())
+user_info = health_data.get_user_info()
 
-user_info['age'] = cm.calculate_age(user_info['dob'])
+
+# user_info['age'] = cm.calculate_age(user_info['dob'])
 
 ###########################################TEST CALULATOR AREA#######################################################
 # body_composition = cbc.calculate_body_metrics(user_info)
@@ -130,12 +134,38 @@ user_info['age'] = cm.calculate_age(user_info['dob'])
 #     'vf': body_composition['Visceral Fat'],
 #     'iw': body_composition['Ideal Weight']
 # }
-# cu.update_csv(user_info, measurements)
+# #cu.update_csv(user_info, measurements)
+#
+# health_data.set_body_composition(body_composition)
+# health_data.set_measurements(measurements)
+# print(health_data.get_measurements())
+#
+# measurements = {
+#     'gender': body_composition['gender'],
+#     'weight': 100,
+#     'age': user_info['age'],
+#     'bmi': body_composition['bmi'],
+#     'bmr': body_composition['bmr'],
+#     'tdee': body_composition['tdee'],
+#     'lbm': body_composition['lbm'],
+#     'fp': body_composition['Fat Percentage'],
+#     'wp': body_composition['Water Percentage'],
+#     'bm': body_composition['Bone Mass'],
+#     'ms': body_composition['Muscle Mass'],
+#     'pp': body_composition['Protein Percentage'],
+#     'vf': body_composition['Visceral Fat'],
+#     'iw': body_composition['Ideal Weight']
+# }
+#
+# health_data.set_measurements(measurements)
+#
+# print(health_data.get_measurements())
 ###########################################TEST CALULATOR AREA#######################################################
 
 async def find_miscale_device():
     # return await BleakScanner().find_device_by_name("MI SCALE2")
     return await BleakScanner().find_device_by_name("Crenot Gofit S2")
+
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
     #######Crenot Gofit S2#######
@@ -149,6 +179,7 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         print(f"Cân nặng: {user_info['weight']} kg")
         ###########################################CALULATOR AREA#######################################################
         body_composition = cbc.calculate_body_metrics(user_info)
+        health_data.set_body_composition(body_composition)
         ###########################################CALULATOR AREA#######################################################
         measurements = {
             'gender': body_composition['gender'],
@@ -166,7 +197,10 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
             'vf': body_composition['Visceral Fat'],
             'iw': body_composition['Ideal Weight']
         }
-        cu.update_csv(user_info, measurements)
+        health_data.set_measurements(measurements)
+        #######################################################
+        csv_measurements = health_data.get_measurements()
+        cu.update_csv(user_info, csv_measurements)
 
 
 async def connect_and_measure():
