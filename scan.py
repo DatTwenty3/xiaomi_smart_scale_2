@@ -12,8 +12,11 @@ from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from tkinter import ttk
 from tkinter import simpledialog
-# BODY_COMPOSITION_MEASUREMENT_UUID = "00002a9d-0000-1000-8000-00805f9b34fb"  # UUID for the Weight Measurement characteristic Mi Scale 2
-BODY_COMPOSITION_MEASUREMENT_UUID = "0000FFB2-0000-1000-8000-00805F9B34FB"  # UUID for the Weight Measurement characteristic Crenot Gofit S2
+
+# BODY_COMPOSITION_MEASUREMENT_UUID = "00002a9d-0000-1000-8000-00805f9b34fb"  # UUID for the Weight Measurement
+# characteristic Mi Scale 2
+BODY_COMPOSITION_MEASUREMENT_UUID = "0000FFB2-0000-1000-8000-00805F9B34FB"  # UUID for the Weight Measurement
+# characteristic Crenot Gofit S2
 
 logger = logging.getLogger(__name__)
 
@@ -148,8 +151,9 @@ async def find_miscale_device():
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
     #######Crenot Gofit S2#######
-    hex_string = data.hex()  # Chuyển bytearray thành chuỗi hex
-    weight = round(float((int(hex_string[13:18], 16) - 524288) / 1000), 2)
+    # hex_string = data.hex()
+    # weight = round(float((int(hex_string[13:18], 16) - 524288) / 1000), 2)
+    weight = round((int(data.hex()[13:18], 16) - 524288) / 1000, 2)
     #######Crenot Gofit S2#######
     # weight = int.from_bytes(data[1:3], byteorder = 'little')/200
 
