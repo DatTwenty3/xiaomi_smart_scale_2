@@ -2,16 +2,16 @@ import asyncio
 import logging
 import threading
 import tkinter as tk
-from tkinter import ttk
-from tkinter import simpledialog
 import calc_metrics as cm
 import csv_update as cu
 import pandas as pd
 import calc_body_composition as cbc
 import info_user as iu
+import ai_recommendations as ai_rcm
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
-
+from tkinter import ttk
+from tkinter import simpledialog
 # BODY_COMPOSITION_MEASUREMENT_UUID = "00002a9d-0000-1000-8000-00805f9b34fb"  # UUID for the Weight Measurement characteristic Mi Scale 2
 BODY_COMPOSITION_MEASUREMENT_UUID = "0000FFB2-0000-1000-8000-00805F9B34FB"  # UUID for the Weight Measurement characteristic Crenot Gofit S2
 
@@ -114,8 +114,6 @@ health_data.set_user_info(input_user_info())
 user_info = health_data.get_user_info()
 
 
-# user_info['age'] = cm.calculate_age(user_info['dob'])
-
 ###########################################TEST CALULATOR AREA#######################################################
 # body_composition = cbc.calculate_body_metrics(user_info)
 # measurements = {
@@ -134,32 +132,13 @@ user_info = health_data.get_user_info()
 #     'vf': body_composition['Visceral Fat'],
 #     'iw': body_composition['Ideal Weight']
 # }
+# print(ai_rcm.ai_health_recommendations(measurements))
 # #cu.update_csv(user_info, measurements)
 #
 # health_data.set_body_composition(body_composition)
 # health_data.set_measurements(measurements)
 # print(health_data.get_measurements())
-#
-# measurements = {
-#     'gender': body_composition['gender'],
-#     'weight': 100,
-#     'age': user_info['age'],
-#     'bmi': body_composition['bmi'],
-#     'bmr': body_composition['bmr'],
-#     'tdee': body_composition['tdee'],
-#     'lbm': body_composition['lbm'],
-#     'fp': body_composition['Fat Percentage'],
-#     'wp': body_composition['Water Percentage'],
-#     'bm': body_composition['Bone Mass'],
-#     'ms': body_composition['Muscle Mass'],
-#     'pp': body_composition['Protein Percentage'],
-#     'vf': body_composition['Visceral Fat'],
-#     'iw': body_composition['Ideal Weight']
-# }
-#
-# health_data.set_measurements(measurements)
-#
-# print(health_data.get_measurements())
+
 ###########################################TEST CALULATOR AREA#######################################################
 
 async def find_miscale_device():
