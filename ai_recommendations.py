@@ -14,6 +14,7 @@ llm = GoogleGenerativeAI(model = 'gemini-pro', temperature = 0.1)
 
 
 def ai_health_recommendations(measurements):
+    print("AI đang đưa ra các đánh giá các thông số sức khoẻ . . .")
     prompt = ChatPromptTemplate.from_messages([
         ('system',
          'Bạn là một chuyên gia sức khỏe, hãy đưa ra nhận xét chi tiết về tất cả các chỉ số tôi cung cấp và khuyến cáo chuyên sâu về sức khỏe dựa trên các chỉ số cơ thể sau'
@@ -36,6 +37,6 @@ def ai_health_recommendations(measurements):
          )
     ])
 
-    response = llm.invoke(prompt.format())
+    response = llm.invoke(prompt.format()).replace('*', '')
 
     return response

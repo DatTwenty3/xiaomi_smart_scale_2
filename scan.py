@@ -184,6 +184,7 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         #######################################################
         csv_measurements = health_data.get_measurements()
         cu.update_csv(user_info, csv_measurements)
+        print(ai_rcm.ai_health_recommendations(health_data.get_measurements()))
 
 
 async def connect_and_measure():
