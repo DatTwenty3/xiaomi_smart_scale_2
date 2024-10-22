@@ -144,7 +144,7 @@ user_info = health_data.get_user_info()
 
 ###########################################TEST CALULATOR AREA#######################################################
 
-async def find_miscale_device():
+async def find_scale_device():
     # return await BleakScanner().find_device_by_name("MI SCALE2")
     return await BleakScanner().find_device_by_name("Crenot Gofit S2")
 
@@ -194,7 +194,7 @@ async def connect_and_measure():
         logger.info("disconnected callback")
         disconnected_event.set()
 
-    device = await find_miscale_device()
+    device = await find_scale_device()
     if device:
         logger.info(f"found device: {device.name}")
     if not device:
