@@ -141,7 +141,6 @@ user_info = health_data.get_user_info()
 # health_data.set_body_composition(body_composition)
 # health_data.set_measurements(measurements)
 # print(health_data.get_measurements())
-
 ###########################################TEST CALULATOR AREA#######################################################
 
 async def find_scale_device():
@@ -151,8 +150,6 @@ async def find_scale_device():
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
     #######Crenot Gofit S2#######
-    # hex_string = data.hex()
-    # weight = round(float((int(hex_string[13:18], 16) - 524288) / 1000), 2)
     weight = round((int(data.hex()[13:18], 16) - 524288) / 1000, 2)
     #######Mi Scale 2#######
     # weight = int.from_bytes(data[1:3], byteorder = 'little')/200
