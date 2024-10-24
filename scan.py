@@ -8,14 +8,19 @@ import pandas as pd
 import calc_body_composition as cbc
 import info_user as iu
 import ai_recommendations as ai_rcm
+import data_parser as parser
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from tkinter import ttk
 from tkinter import simpledialog
 
-# BODY_COMPOSITION_MEASUREMENT_UUID = "00002a9d-0000-1000-8000-00805f9b34fb"  # UUID for the Weight Measurement
+
+# DEVICE_NAME = 'MI SCALE2'
+# BODY_COMPOSITION_MEASUREMENT_UUID = '00002a9d-0000-1000-8000-00805f9b34fb'  # UUID for the Weight Measurement
 # characteristic Mi Scale 2
-BODY_COMPOSITION_MEASUREMENT_UUID = "0000FFB2-0000-1000-8000-00805F9B34FB"  # UUID for the Weight Measurement
+
+DEVICE_NAME = 'Crenot Gofit S2'
+BODY_COMPOSITION_MEASUREMENT_UUID = '0000FFB2-0000-1000-8000-00805F9B34FB'  # UUID for the Weight Measurement
 # characteristic Crenot Gofit S2
 
 logger = logging.getLogger(__name__)
@@ -144,15 +149,12 @@ user_info = health_data.get_user_info()
 ###########################################TEST CALULATOR AREA#######################################################
 
 async def find_scale_device():
-    # return await BleakScanner().find_device_by_name("MI SCALE2")
-    return await BleakScanner().find_device_by_name("Crenot Gofit S2")
+    return await BleakScanner().find_device_by_name(DEVICE_NAME)
 
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
-    #######Crenot Gofit S2#######
-    weight = round((int(data.hex()[13:18], 16) - 524288) / 1000, 2)
-    #######Mi Scale 2#######
-    # weight = int.from_bytes(data[1:3], byteorder = 'little')/200
+
+    weight = parser.data_parser(data, DEVICE_NAME)
 
     if cbc.is_meaningful_weight(user_info, weight):
         user_info['weight'] = weight
@@ -160,29 +162,10 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         ###########################################CALULATOR AREA#######################################################
         body_composition = cbc.calculate_body_metrics(user_info)
         health_data.set_body_composition(body_composition)
+        #CSV file update and AI recommendations
+        cu.update_csv(user_info, health_data.get_body_composition())
+        print(ai_rcm.ai_health_recommendations(health_data.get_body_composition()))
         ###########################################CALULATOR AREA#######################################################
-        measurements = {
-            'gender': body_composition['gender'],
-            'weight': user_info['weight'],
-            'age': user_info['age'],
-            'bmi': body_composition['bmi'],
-            'bmr': body_composition['bmr'],
-            'tdee': body_composition['tdee'],
-            'lbm': body_composition['lbm'],
-            'fp': body_composition['Fat Percentage'],
-            'wp': body_composition['Water Percentage'],
-            'bm': body_composition['Bone Mass'],
-            'ms': body_composition['Muscle Mass'],
-            'pp': body_composition['Protein Percentage'],
-            'vf': body_composition['Visceral Fat'],
-            'iw': body_composition['Ideal Weight']
-        }
-        health_data.set_measurements(measurements)
-        #######################################################
-        csv_measurements = health_data.get_measurements()
-        cu.update_csv(user_info, csv_measurements)
-        print(ai_rcm.ai_health_recommendations(health_data.get_measurements()))
-
 
 async def connect_and_measure():
     disconnected_event = asyncio.Event()

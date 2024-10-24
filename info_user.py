@@ -20,11 +20,3 @@ class HealthDataManager:
     # Hàm set body_composition
     def set_body_composition(self, new_body_composition):
         self.body_composition = new_body_composition
-
-    # Hàm get measurements
-    def get_measurements(self):
-        return self.measurements
-
-    # Hàm set measurements
-    def set_measurements(self, new_measurements):
-        self.measurements = new_measurements

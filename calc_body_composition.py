@@ -28,18 +28,20 @@ def calculate_body_metrics(user_info):
     iw = cm.get_ideal_weight(predicted_gender, user_info['height'], True)
     # Trả về tất cả các kết quả dưới dạng dictionary
     return {
-        'bmi': bmi,
         'gender': predicted_gender,
+        'weight': user_info['weight'],
+        'age': user_info['age'],
+        'bmi': bmi,
         'bmr': bmr,
         'tdee': tdee,
         'lbm': lbm,
-        'Fat Percentage': fp,
-        'Water Percentage': wp,
-        'Bone Mass': bm,
-        'Muscle Mass': ms,
-        'Protein Percentage': pp,
-        'Visceral Fat': vf,
-        'Ideal Weight': iw
+        'fp': fp,
+        'wp': wp,
+        'bm': bm,
+        'ms': ms,
+        'pp': pp,
+        'vf': vf,
+        'iw': iw
     }
 
 
