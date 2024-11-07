@@ -167,7 +167,7 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         cu.update_csv(user_info, health_data.get_body_composition())
         ai_recommend = ai_rcm.ai_health_recommendations(health_data.get_body_composition())
         print(ai_recommend)
-        read_recommend_vietnamese(ai_recommend)
+        read_recommend_vietnamese(user_info, ai_recommend)
         ###########################################CALULATOR AREA#######################################################
 
 async def connect_and_measure():
