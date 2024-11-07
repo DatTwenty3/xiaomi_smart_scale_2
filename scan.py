@@ -9,18 +9,19 @@ import calc_body_composition as cbc
 import info_user as iu
 import ai_recommendations as ai_rcm
 import data_parser as parser
+from ai_voice import read_recommend_vietnamese
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from tkinter import ttk
 from tkinter import simpledialog
 
 
-DEVICE_NAME = 'MI SCALE2'
-BODY_COMPOSITION_MEASUREMENT_UUID = '00002a9d-0000-1000-8000-00805f9b34fb'  # UUID for the Weight Measurement
+#DEVICE_NAME = 'MI SCALE2'
+#BODY_COMPOSITION_MEASUREMENT_UUID = '00002a9d-0000-1000-8000-00805f9b34fb'  # UUID for the Weight Measurement
 # characteristic Mi Scale 2
 
-#DEVICE_NAME = 'Crenot Gofit S2'
-#BODY_COMPOSITION_MEASUREMENT_UUID = '0000FFB2-0000-1000-8000-00805F9B34FB'  # UUID for the Weight Measurement
+DEVICE_NAME = 'Crenot Gofit S2'
+BODY_COMPOSITION_MEASUREMENT_UUID = '0000FFB2-0000-1000-8000-00805F9B34FB'  # UUID for the Weight Measurement
 # characteristic Crenot Gofit S2
 
 logger = logging.getLogger(__name__)
@@ -164,7 +165,9 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         health_data.set_body_composition(body_composition)
         #CSV file update and AI recommendations
         cu.update_csv(user_info, health_data.get_body_composition())
-        print(ai_rcm.ai_health_recommendations(health_data.get_body_composition()))
+        ai_recommend = ai_rcm.ai_health_recommendations(health_data.get_body_composition())
+        print(ai_recommend)
+        read_recommend_vietnamese(ai_recommend)
         ###########################################CALULATOR AREA#######################################################
 
 async def connect_and_measure():
