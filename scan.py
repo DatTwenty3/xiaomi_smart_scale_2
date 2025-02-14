@@ -9,6 +9,7 @@ import calc_body_composition as cbc
 import info_user as iu
 import ai_recommendations as ai_rcm
 import data_parser as parser
+import oneleg_standing_timer as ast
 from ai_voice import read_recommend_vietnamese
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -163,11 +164,15 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         ###########################################CALULATOR AREA#######################################################
         body_composition = cbc.calculate_body_metrics(user_info)
         health_data.set_body_composition(body_composition)
+        oneleg_standing_timer = ast.one_leg_balance_detection()
+        print("=== KẾT QUẢ ĐO ===")
+        print(f"Thời gian đứng 1 chân: {oneleg_standing_timer['session_duration']:.1f} giây")
+        print(f"Độ lệch trung tâm trung bình: {oneleg_standing_timer['avg_offset']:.1f} pixels")
         #CSV file update and AI recommendations
         cu.update_csv(user_info, health_data.get_body_composition())
         ai_recommend = ai_rcm.ai_health_recommendations(health_data.get_body_composition())
         print(ai_recommend)
-        read_recommend_vietnamese(user_info, ai_recommend)
+        #read_recommend_vietnamese(user_info, ai_recommend)
         ###########################################CALULATOR AREA#######################################################
 
 async def connect_and_measure():
