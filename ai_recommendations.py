@@ -33,7 +33,8 @@ def ai_health_recommendations(measurements):
             Khối lượng xương: {measurements['bm']} kg, 
             Khối lượng cơ: {measurements['ms']} kg, 
             Tỷ lệ protein: {measurements['pp']}%, 
-            Mỡ nội tạng: {measurements['vf']}."""
+            Mỡ nội tạng: {measurements['vf']},
+            Thời gian thăng bằng trên 1 chân {measurements['ols']} giây."""
          )
     ])
 

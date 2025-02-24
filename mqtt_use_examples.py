@@ -24,7 +24,7 @@ measurements = {
 }
 
 while True:
-    mqtt_client.publish('v1/devices/me/telemetry', measurements)
+    mqtt_client.publish(PUBLISH_TOPIC, measurements)
     # Cập nhật giá trị hoặc thực hiện các thao tác khác nếu cần
     measurements['temperature'] += 1
     measurements['humidity'] += 1

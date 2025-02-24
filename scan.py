@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import threading
+import os
+import sys
 import tkinter as tk
 import calc_metrics as cm
 import csv_update as cu
@@ -10,12 +12,12 @@ import info_user as iu
 import ai_recommendations as ai_rcm
 import data_parser as parser
 import oneleg_standing_timer as ast
+from mqtt_client_handler import MQTTClient
 from ai_voice import read_recommend_vietnamese
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from tkinter import ttk
 from tkinter import simpledialog
-
 
 #DEVICE_NAME = 'MI SCALE2'
 #BODY_COMPOSITION_MEASUREMENT_UUID = '00002a9d-0000-1000-8000-00805f9b34fb'  # UUID for the Weight Measurement
@@ -24,6 +26,14 @@ from tkinter import simpledialog
 DEVICE_NAME = 'Crenot Gofit S2'
 BODY_COMPOSITION_MEASUREMENT_UUID = '0000FFB2-0000-1000-8000-00805F9B34FB'  # UUID for the Weight Measurement
 # characteristic Crenot Gofit S2
+
+# Thông tin cấu hình MQTT
+BROKER_ADDRESS = "app.coreiot.io"
+PORT = 1883
+USERNAME = "smart-scale"
+PASSWORD = "smart-scale"
+CLIENT_ID = "smart-scale"
+PUBLISH_TOPIC = "v1/devices/me/telemetry"
 
 logger = logging.getLogger(__name__)
 
@@ -120,11 +130,15 @@ def input_user_info():
     return dialog.result
 
 
+# Khởi tạo và kết nối MQTT
+mqtt_client = MQTTClient(BROKER_ADDRESS, PORT, USERNAME, PASSWORD, client_id = CLIENT_ID)
+mqtt_client.connect()
+
 health_data.set_user_info(input_user_info())
 user_info = health_data.get_user_info()
 
 
-###########################################TEST CALULATOR AREA#######################################################
+###########################################TEST CALULATOR AREA##########################################################
 # body_composition = cbc.calculate_body_metrics(user_info)
 # measurements = {
 #     'gender': body_composition['gender'],
@@ -148,14 +162,13 @@ user_info = health_data.get_user_info()
 # health_data.set_body_composition(body_composition)
 # health_data.set_measurements(measurements)
 # print(health_data.get_measurements())
-###########################################TEST CALULATOR AREA#######################################################
+###########################################TEST CALULATOR AREA##########################################################
 
 async def find_scale_device():
     return await BleakScanner().find_device_by_name(DEVICE_NAME)
 
 
 def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearray):
-
     weight = parser.data_parser(data, DEVICE_NAME)
 
     if cbc.is_meaningful_weight(user_info, weight):
@@ -164,14 +177,16 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
         ###########################################CALULATOR AREA#######################################################
         body_composition = cbc.calculate_body_metrics(user_info)
         health_data.set_body_composition(body_composition)
-        oneleg_standing_timer = ast.one_leg_balance_detection()
-        print("=== KẾT QUẢ ĐO ===")
-        print(f"Thời gian đứng 1 chân: {oneleg_standing_timer['session_duration']:.1f} giây")
-        print(f"Độ lệch trung tâm trung bình: {oneleg_standing_timer['avg_offset']:.1f} pixels")
+        # oneleg_standing_timer = ast.one_leg_balance_detection()
+        # print("=== KẾT QUẢ ĐO ===")
+        # print(f"Thời gian đứng 1 chân: {oneleg_standing_timer['session_duration']:.1f} giây")
+        # print(f"Độ lệch trung tâm trung bình: {oneleg_standing_timer['avg_offset']:.1f} pixels")
         #CSV file update and AI recommendations
+        mqtt_client.publish(PUBLISH_TOPIC, health_data.get_body_composition())
         cu.update_csv(user_info, health_data.get_body_composition())
         ai_recommend = ai_rcm.ai_health_recommendations(health_data.get_body_composition())
         print(ai_recommend)
+        sys.exit(0)
         #read_recommend_vietnamese(user_info, ai_recommend)
         ###########################################CALULATOR AREA#######################################################
 

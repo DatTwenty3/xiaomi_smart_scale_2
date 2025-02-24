@@ -9,7 +9,7 @@ def update_csv(user_info, measurements):
     headers = [
         "datetime", "name", "age", "gender", "height", "weight", "dob", "activity_factor",
         "bmi", "bmr", "tdee", "lean_body_mass", "fat_percentage",
-        "water_percentage", "bone_mass", "muscle_mass", "protein_percentage", "visceral_fat", "ideal_weight"
+        "water_percentage", "bone_mass", "muscle_mass", "protein_percentage", "visceral_fat", "ideal_weight", "oneleg_standing"
     ]
 
     row = [
@@ -31,7 +31,8 @@ def update_csv(user_info, measurements):
         measurements['ms'],
         measurements['pp'],
         measurements['vf'],
-        measurements['iw']
+        measurements['iw'],
+        measurements['ols']
     ]
 
     file_exists = os.path.isfile(file_path)

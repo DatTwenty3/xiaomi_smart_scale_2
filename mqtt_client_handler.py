@@ -13,11 +13,11 @@ class MQTTClient:
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            print("Connected successfully!")
+            print("Kết nối với MQTT Broker thành công!")
             # Nếu cần subscribe topic nào, bạn có thể đặt ở đây
             client.subscribe("v1/devices/me/rpc/request/+")
         else:
-            print("Connection failed with code", rc)
+            print("Kết nối bị lỗi với mã:", rc)
 
     def on_message(self, client, userdata, message):
         payload = message.payload.decode("utf-8")
@@ -28,11 +28,15 @@ class MQTTClient:
                 temp_data = {'value': jsonobj.get('params')}
                 client.publish('v1/devices/me/attributes', json.dumps(temp_data), qos=1)
         except Exception as e:
-            print("Error processing message:", e)
+            print("Đã xảy ra lỗi trong quá trình phản hồi MQTT Broker:", e)
 
     def connect(self):
         self.client.connect(self.broker_address, self.port)
 
     def publish(self, topic, payload, qos=1):
         """Hàm publish có thể gọi từ bên ngoài"""
-        self.client.publish(topic, json.dumps(payload), qos)
+        try:
+            self.client.publish(topic, json.dumps(payload), qos)
+            print('Đã publish thành công lên MQTT Broker !')
+        except Exception as e:
+            print("Đã xảy ra lỗi trong quá trình publish lên MQTT Broker:", e)

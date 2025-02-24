@@ -1,6 +1,7 @@
 import calc_metrics as cm
+import oneleg_standing_timer as ast
 import ai_predict as ap
-
+import oneleg_timer as ot
 
 def calculate_body_metrics(user_info):
     # Tính BMI
@@ -26,6 +27,8 @@ def calculate_body_metrics(user_info):
     vf = cm.get_visceral_fat(predicted_gender, user_info['height'], user_info['weight'], user_info['age'])
     # Tính ideal weight (cân nặng lý tưởng)
     iw = cm.get_ideal_weight(predicted_gender, user_info['height'], True)
+    # Đo thời gian thăng bằng trên 1 chân
+    ols = ot.one_leg_balance_detection()
     # Trả về tất cả các kết quả dưới dạng dictionary
     return {
         'gender': predicted_gender,
@@ -41,7 +44,8 @@ def calculate_body_metrics(user_info):
         'ms': ms,
         'pp': pp,
         'vf': vf,
-        'iw': iw
+        'iw': iw,
+        'ols': round(ols['session_duration'], 1)
     }
 
 
