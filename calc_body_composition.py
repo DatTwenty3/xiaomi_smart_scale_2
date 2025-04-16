@@ -50,14 +50,8 @@ def calculate_body_metrics(user_info):
 
 
 def weight_dont_duplicate(user_info, weight):
-    if weight != user_info['weight']:
-        return True
-    else:
-        return False
+    return weight != user_info['weight']
 
 
 def is_meaningful_weight(user_info, weight):
-    if (cm.get_bmi(user_info['height'], weight) > 12) and weight_dont_duplicate(user_info, weight):
-        return True
-    else:
-        return False
+    return cm.get_bmi(user_info['height'], weight) > 12 and weight_dont_duplicate(user_info, weight)
