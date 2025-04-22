@@ -179,25 +179,15 @@ def get_protein_percentage(gender, age, weight, height, orig=True):
     return check_val_overflow(protein_percentage, 5, 32)
 
 
-def get_visceral_fat(gender, height, weight, age):
-    if gender == 'female':
-        if weight > (13 - (height * 0.5)) * -1:
-            subsubcalc = ((height * 1.45) + (height * 0.1158) * height) - 120
-            sub_calc = weight * 500 / subsubcalc
-            visceral_fat = (sub_calc - 6) + (age * 0.07)
-        else:
-            sub_calc = 0.691 + (height * -0.0024) + (height * -0.0024)
-            visceral_fat = (((height * 0.027) - (sub_calc * weight)) * -1) + (age * 0.07) - age
+def get_visceral_fat(height, weight, age):
+    if height < weight * 1.6:
+        sub_calc = ((height * 0.4) - (height * (height * 0.0826))) * -1
+        visceral_fat = ((weight * 305) / (sub_calc + 48)) - 2.9 + (age * 0.15)
     else:
-        if height < weight * 1.6:
-            sub_calc = ((height * 0.4) - (height * (height * 0.0826))) * -1
-            visceral_fat = ((weight * 305) / (sub_calc + 48)) - 2.9 + (age * 0.15)
-        else:
-            sub_calc = 0.765 + height * -0.0015
-            visceral_fat = (((height * 0.143) - (weight * sub_calc)) * -1) + (age * 0.15) - 5.0
+        sub_calc = 0.765 + height * -0.0015
+        visceral_fat = (((height * 0.143) - (weight * sub_calc)) * -1) + (age * 0.15) - 5.0
 
     visceral_fat = round(visceral_fat, 2)
-
     return check_val_overflow(visceral_fat, 1, 50)
 
 

@@ -24,7 +24,7 @@ def calculate_body_metrics(user_info):
     # Tính protein percentage (phần trăm protein)
     pp = cm.get_protein_percentage(predicted_gender, user_info['age'], user_info['weight'], user_info['height'], True)
     # Tính visceral fat (mỡ nội tạng)
-    vf = cm.get_visceral_fat(predicted_gender, user_info['height'], user_info['weight'], user_info['age'])
+    vf = cm.get_visceral_fat(user_info['height'], user_info['weight'], user_info['age'])
     # Tính ideal weight (cân nặng lý tưởng)
     iw = cm.get_ideal_weight(predicted_gender, user_info['height'], True)
     # Đo thời gian thăng bằng trên 1 chân
