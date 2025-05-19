@@ -10,7 +10,7 @@ os.environ['LANGCHAIN_API_KEY'] = os.getenv('LANGCHAIN_API_KEY')
 os.environ['GOOGLE_API_KEY'] = os.getenv('GOOGLE_API_KEY')
 
 # Loading the model
-llm = GoogleGenerativeAI(model = 'gemini-1.5-pro', temperature = 0.1)
+llm = GoogleGenerativeAI(model = 'gemini-2.0-flash', temperature = 0.1)
 
 
 def ai_health_recommendations(measurements):
