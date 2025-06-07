@@ -3,7 +3,7 @@ import logging
 import threading
 import sys
 import tkinter as tk
-from tkinter import ttk, simpledialog
+from tkinter import ttk, simpledialog, messagebox
 import random
 
 import calc_metrics as cm
@@ -18,6 +18,7 @@ from mqtt_client_handler import MQTTClient
 from ai_voice import read_recommend_vietnamese
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
+from qr_scaner import scan_cccd_qr
 
 # ==============================================================================
 # CONFIGURATION
@@ -66,99 +67,151 @@ root = tk.Tk()
 root.withdraw()
 health_data = iu.HealthDataManager()
 
-
 # ==============================================================================
 # USER INTERFACE
 # ==============================================================================
 
 class UserInfoDialog(simpledialog.Dialog):
-    """Dialog for user information input and selection"""
+    """Dialog for user information input with CCCD QR scanner"""
 
     def __init__(self, parent):
-        self.user_data = self._load_user_data()
-        self.names = self.user_data['name'].tolist()
+        self.cccd_data = None
         super().__init__(parent)
-
-    def _load_user_data(self):
-        """Load and clean user data from CSV"""
-        user_data = pd.read_csv('user_data/user_data.csv')
-        return user_data.drop_duplicates(subset = 'name')
 
     def body(self, master):
         """Create dialog body"""
         self.title("Nhập thông tin cá nhân")
 
-        # User selection
-        tk.Label(master, text = "Tạo mới hoặc chọn tên người dùng:").grid(row = 0, column = 0)
-        self.name_var = tk.StringVar()
-        self.name_menu = ttk.Combobox(master, textvariable = self.name_var, values = self.names)
-        self.name_menu.grid(row = 0, column = 1)
-        self.name_menu.bind("<<ComboboxSelected>>", self.on_name_select)
+        # CCCD QR Scanner section
+        qr_frame = tk.Frame(master)
+        qr_frame.grid(row = 0, column = 0, columnspan = 2, pady = 10)
 
-        # Input fields
-        self._create_input_fields(master)
+        tk.Label(qr_frame, text = "1. Quét mã QR trên CCCD:", font = ("Arial", 10, "bold")).pack()
+        self.scan_button = tk.Button(qr_frame, text = "Quét CCCD", command = self.scan_cccd,
+                                     bg = "#4CAF50", fg = "white", font = ("Arial", 9))
+        self.scan_button.pack(pady = 5)
+
+        # Status label for CCCD scan
+        self.cccd_status = tk.Label(qr_frame, text = "Chưa quét CCCD", fg = "red")
+        self.cccd_status.pack()
+
+        # User info display (read-only)
+        info_frame = tk.Frame(master)
+        info_frame.grid(row = 1, column = 0, columnspan = 2, pady = 10)
+
+        tk.Label(info_frame, text = "Thông tin từ CCCD:", font = ("Arial", 10, "bold")).grid(row = 0, column = 0,
+                                                                                             columnspan = 2)
+
+        tk.Label(info_frame, text = "Họ tên:").grid(row = 1, column = 0, sticky = "w")
+        self.name_label = tk.Label(info_frame, text = "", bg = "lightgray", width = 30, anchor = "w")
+        self.name_label.grid(row = 1, column = 1, padx = 5)
+
+        tk.Label(info_frame, text = "Ngày sinh:").grid(row = 2, column = 0, sticky = "w")
+        self.dob_label = tk.Label(info_frame, text = "", bg = "lightgray", width = 30, anchor = "w")
+        self.dob_label.grid(row = 2, column = 1, padx = 5)
+
+        tk.Label(info_frame, text = "Giới tính:").grid(row = 3, column = 0, sticky = "w")
+        self.gender_label = tk.Label(info_frame, text = "", bg = "lightgray", width = 30, anchor = "w")
+        self.gender_label.grid(row = 3, column = 1, padx = 5)
+
+        # Manual input section
+        input_frame = tk.Frame(master)
+        input_frame.grid(row = 2, column = 0, columnspan = 2, pady = 10)
+
+        tk.Label(input_frame, text = "2. Nhập thông tin bổ sung:", font = ("Arial", 10, "bold")).grid(row = 0,
+                                                                                                      column = 0,
+                                                                                                      columnspan = 2)
+
+        # Height input
+        tk.Label(input_frame, text = "Chiều cao (cm):").grid(row = 1, column = 0, sticky = "w")
+        self.height_entry = tk.Entry(input_frame, width = 30)
+        self.height_entry.grid(row = 1, column = 1, padx = 5)
 
         # Activity level dropdown
-        self._create_activity_dropdown(master)
-
-        return self.name_menu
-
-    def _create_input_fields(self, master):
-        """Create input fields for user data"""
-        tk.Label(master, text = "Ngày sinh (dd/mm/yyyy):").grid(row = 1)
-        tk.Label(master, text = "Chiều cao (cm):").grid(row = 2)
-
-        self.dob_entry = tk.Entry(master)
-        self.height_entry = tk.Entry(master)
-
-        self.dob_entry.grid(row = 1, column = 1)
-        self.height_entry.grid(row = 2, column = 1)
-
-    def _create_activity_dropdown(self, master):
-        """Create activity level dropdown"""
-        tk.Label(master, text = "Hệ số hoạt động:").grid(row = 3)
-
+        tk.Label(input_frame, text = "Hệ số hoạt động:").grid(row = 2, column = 0, sticky = "w")
         self.activity_var = tk.StringVar()
         self.activity_var.set("Ít vận động")
-
         self.activity_menu = ttk.OptionMenu(
-            master, self.activity_var, "Ít vận động", *ACTIVITY_LEVELS.keys()
+            input_frame, self.activity_var, "Ít vận động", *ACTIVITY_LEVELS.keys()
         )
-        self.activity_menu.grid(row = 3, column = 1)
+        self.activity_menu.grid(row = 2, column = 1, sticky = "w", padx = 5)
 
-    def on_name_select(self, event):
-        """Handle user name selection"""
-        selected_name = self.name_var.get()
-        user_info = self.user_data[self.user_data['name'] == selected_name]
+        # Add note about weight measurement
+        note_frame = tk.Frame(master)
+        note_frame.grid(row = 3, column = 0, columnspan = 2, pady = 10)
 
-        if not user_info.empty:
-            self._populate_fields(user_info.iloc[0])
+        note_text = "Lưu ý: Cân nặng sẽ được đo tự động từ thiết bị cân thông minh"
+        tk.Label(note_frame, text = note_text, font = ("Arial", 9, "italic"), fg = "blue").pack()
 
-    def _populate_fields(self, user_record):
-        """Populate fields with selected user data"""
-        # Clear existing data
-        self.dob_entry.delete(0, tk.END)
-        self.height_entry.delete(0, tk.END)
+        return self.scan_button
 
-        # Fill with user data
-        self.dob_entry.insert(0, user_record['dob'])
-        self.height_entry.insert(0, int(user_record['height']))
+    def scan_cccd(self):
+        """Handle CCCD QR code scanning"""
+        try:
+            # Call the QR scanner function
+            self.cccd_data = scan_cccd_qr()
 
-        # Set activity level
-        activity_mapping = {v: k for k, v in ACTIVITY_LEVELS.items()}
-        activity_factor = user_record['activity_factor']
-        self.activity_var.set(activity_mapping.get(activity_factor, "Ít vận động"))
+            if self.cccd_data:
+                # Update the display labels
+                self.name_label.config(text = self.cccd_data.get('name', ''))
+                self.dob_label.config(text = self.cccd_data.get('dob', ''))
+                self.gender_label.config(text = self.cccd_data.get('gender', ''))
+
+                # Update status
+                self.cccd_status.config(text = "✓ Đã quét CCCD thành công", fg = "green")
+
+                # Enable input fields
+                self.height_entry.config(state = "normal")
+
+                messagebox.showinfo("Thành công", "Đã quét CCCD thành công!\nVui lòng nhập chiều cao.")
+            else:
+                messagebox.showerror("Lỗi", "Không thể quét mã QR CCCD. Vui lòng thử lại.")
+
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Lỗi khi quét CCCD: {str(e)}")
+
+    def validate(self):
+        """Validate input before applying"""
+        if not self.cccd_data:
+            messagebox.showerror("Lỗi", "Vui lòng quét CCCD trước!")
+            return False
+
+        if not self.height_entry.get().strip():
+            messagebox.showerror("Lỗi", "Vui lòng nhập chiều cao!")
+            return False
+
+        try:
+            height = float(self.height_entry.get())
+
+            if height <= 0 or height > 300:
+                messagebox.showerror("Lỗi", "Chiều cao không hợp lệ (1-300 cm)!")
+                return False
+
+        except ValueError:
+            messagebox.showerror("Lỗi", "Vui lòng nhập số hợp lệ cho chiều cao!")
+            return False
+
+        return True
 
     def apply(self):
         """Apply user input"""
-        self.result = {
-            "name": self.name_var.get(),
-            "dob": self.dob_entry.get(),
-            "height": int(self.height_entry.get()),
-            "weight": 75.70,  # Default weight
-            "age": cm.calculate_age(self.dob_entry.get()),
-            "activity_factor": ACTIVITY_LEVELS[self.activity_var.get()]
-        }
+        if self.cccd_data:
+            # Calculate age from date of birth
+            age = cm.calculate_age(self.cccd_data['dob'])
+
+            self.result = {
+                "name": self.cccd_data['name'],
+                "dob": self.cccd_data['dob'],
+                "gender": self.cccd_data['gender'],
+                "cccd_id": self.cccd_data['cccd_id'],
+                "address": self.cccd_data.get('address', ''),
+                "height": float(self.height_entry.get()),
+                "weight": None,  # Weight will be set later from scale data
+                "age": age,
+                "activity_factor": ACTIVITY_LEVELS[self.activity_var.get()]
+            }
+        else:
+            self.result = None
 
 
 # ==============================================================================
@@ -264,6 +317,9 @@ async def fake_weight_testing():
 def get_user_info():
     """Get user information through dialog"""
     dialog = UserInfoDialog(root)
+    if dialog.result is None:
+        logger.error("No user information provided")
+        sys.exit(1)
     return dialog.result
 
 
