@@ -81,70 +81,77 @@ class UserInfoDialog(simpledialog.Dialog):
 
     def body(self, master):
         """
-        Tạo giao diện nhập thông tin người dùng.
+        Giao diện phẳng, không viền, không nổi khối.
         """
         self.title("Nhập thông tin cá nhân")
 
-        # CCCD QR Scanner section
-        qr_frame = tk.Frame(master)
-        qr_frame.grid(row = 0, column = 0, columnspan = 2, pady = 10)
+        # Style phẳng, không viền
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure('TFrame', background='#f4f6fb')
+        style.configure('TLabel', background='#f4f6fb', font=("Segoe UI", 10))
+        style.configure('Header.TLabel', font=("Segoe UI", 12, "bold"), background='#f4f6fb', foreground='#1976d2')
+        style.configure('TButton', font=("Segoe UI", 10, "bold"), padding=8, relief="flat", background="#1976d2", foreground="white", borderwidth=0)
+        style.map('TButton', background=[('active', '#1565c0')])
+        style.configure('TEntry', padding=6, relief="flat", borderwidth=0)
+        style.configure('TOptionMenu', padding=6, relief="flat", borderwidth=0)
 
-        tk.Label(qr_frame, text = "1. Quét mã QR trên CCCD:", font = ("Arial", 10, "bold")).pack()
-        self.scan_button = tk.Button(qr_frame, text = "Quét CCCD", command = self.scan_cccd,
-                                     bg = "#4CAF50", fg = "white", font = ("Arial", 9))
-        self.scan_button.pack(pady = 5)
+        master.configure(bg='#f4f6fb')
 
-        # Status label for CCCD scan
-        self.cccd_status = tk.Label(qr_frame, text = "Chưa quét CCCD", fg = "red")
-        self.cccd_status.pack()
+        # Khung tổng (dùng Frame, không LabelFrame)
+        container = ttk.Frame(master, style='TFrame', padding=(24, 24, 24, 16))
+        container.pack(fill="both", expand=True)
 
-        # User info display (read-only)
-        info_frame = tk.Frame(master)
-        info_frame.grid(row = 1, column = 0, columnspan = 2, pady = 10)
+        # Tiêu đề
+        ttk.Label(container, text="Nhập thông tin cá nhân", style='Header.TLabel').pack(anchor="w", pady=(0, 18))
 
-        tk.Label(info_frame, text = "Thông tin từ CCCD:", font = ("Arial", 10, "bold")).grid(row = 0, column = 0,
-                                                                                             columnspan = 2)
+        # Khung quét CCCD
+        cccd_frame = ttk.Frame(container, style='TFrame')
+        cccd_frame.pack(fill="x", pady=(0, 12))
 
-        tk.Label(info_frame, text = "Họ tên:").grid(row = 1, column = 0, sticky = "w")
-        self.name_label = tk.Label(info_frame, text = "", bg = "lightgray", width = 30, anchor = "w")
-        self.name_label.grid(row = 1, column = 1, padx = 5)
+        self.scan_button = ttk.Button(cccd_frame, text="Quét CCCD", command=self.scan_cccd, style='TButton')
+        self.scan_button.pack(side="left", pady=(0, 0))
 
-        tk.Label(info_frame, text = "Ngày sinh:").grid(row = 2, column = 0, sticky = "w")
-        self.dob_label = tk.Label(info_frame, text = "", bg = "lightgray", width = 30, anchor = "w")
-        self.dob_label.grid(row = 2, column = 1, padx = 5)
+        self.cccd_status = ttk.Label(cccd_frame, text="Chưa quét CCCD", foreground="#bdbdbd", style='TLabel')
+        self.cccd_status.pack(side="left", padx=(12, 0))
 
-        tk.Label(info_frame, text = "Giới tính:").grid(row = 3, column = 0, sticky = "w")
-        self.gender_label = tk.Label(info_frame, text = "", bg = "lightgray", width = 30, anchor = "w")
-        self.gender_label.grid(row = 3, column = 1, padx = 5)
+        # Thông tin từ CCCD
+        info_frame = ttk.Frame(container, style='TFrame')
+        info_frame.pack(fill="x", pady=(0, 12))
 
-        # Manual input section
-        input_frame = tk.Frame(master)
-        input_frame.grid(row = 2, column = 0, columnspan = 2, pady = 10)
+        ttk.Label(info_frame, text="Họ tên:").grid(row=0, column=0, sticky="w", pady=2)
+        self.name_label = ttk.Label(info_frame, text="", width=30, anchor="w", style='TLabel')
+        self.name_label.grid(row=0, column=1, padx=5, sticky="w", pady=2)
 
-        tk.Label(input_frame, text = "2. Nhập thông tin bổ sung:", font = ("Arial", 10, "bold")).grid(row = 0,
-                                                                                                      column = 0,
-                                                                                                      columnspan = 2)
+        ttk.Label(info_frame, text="Ngày sinh:").grid(row=1, column=0, sticky="w", pady=2)
+        self.dob_label = ttk.Label(info_frame, text="", width=30, anchor="w", style='TLabel')
+        self.dob_label.grid(row=1, column=1, padx=5, sticky="w", pady=2)
 
-        # Height input
-        tk.Label(input_frame, text = "Chiều cao (cm):").grid(row = 1, column = 0, sticky = "w")
-        self.height_entry = tk.Entry(input_frame, width = 30)
-        self.height_entry.grid(row = 1, column = 1, padx = 5)
+        ttk.Label(info_frame, text="Giới tính:").grid(row=2, column=0, sticky="w", pady=2)
+        self.gender_label = ttk.Label(info_frame, text="", width=30, anchor="w", style='TLabel')
+        self.gender_label.grid(row=2, column=1, padx=5, sticky="w", pady=2)
 
-        # Activity level dropdown
-        tk.Label(input_frame, text = "Hệ số hoạt động:").grid(row = 2, column = 0, sticky = "w")
+        # Thông tin bổ sung
+        input_frame = ttk.Frame(container, style='TFrame')
+        input_frame.pack(fill="x", pady=(0, 12))
+
+        ttk.Label(input_frame, text="Chiều cao (cm):").grid(row=0, column=0, sticky="w", pady=2)
+        self.height_entry = ttk.Entry(input_frame, width=30)
+        self.height_entry.grid(row=0, column=1, padx=5, sticky="w", pady=2)
+
+        ttk.Label(input_frame, text="Hệ số hoạt động:").grid(row=1, column=0, sticky="w", pady=2)
         self.activity_var = tk.StringVar()
         self.activity_var.set("Ít vận động")
         self.activity_menu = ttk.OptionMenu(
             input_frame, self.activity_var, "Ít vận động", *ACTIVITY_LEVELS.keys()
         )
-        self.activity_menu.grid(row = 2, column = 1, sticky = "w", padx = 5)
+        self.activity_menu.grid(row=1, column=1, sticky="w", padx=5, pady=2)
 
-        # Add note about weight measurement
-        note_frame = tk.Frame(master)
-        note_frame.grid(row = 3, column = 0, columnspan = 2, pady = 10)
-
+        # Ghi chú
+        note_frame = ttk.Frame(container, style='TFrame')
+        note_frame.pack(fill="x", pady=(0, 0))
         note_text = "Lưu ý: Cân nặng sẽ được đo tự động từ thiết bị cân thông minh"
-        tk.Label(note_frame, text = note_text, font = ("Arial", 9, "italic"), fg = "blue").pack()
+        ttk.Label(note_frame, text=note_text, font=("Segoe UI", 9, "italic"), foreground="#1976d2", style='TLabel').pack(anchor="w")
 
         return self.scan_button
 
@@ -163,17 +170,19 @@ class UserInfoDialog(simpledialog.Dialog):
                 self.gender_label.config(text = self.cccd_data.get('gender', ''))
 
                 # Update status
-                self.cccd_status.config(text = "✓ Đã quét CCCD thành công", fg = "green")
+                self.cccd_status.config(text = "✓ Đã quét CCCD thành công", foreground="#43a047")
 
                 # Enable input fields
                 self.height_entry.config(state = "normal")
 
                 messagebox.showinfo("Thành công", "Đã quét CCCD thành công!\nVui lòng nhập chiều cao.")
             else:
+                self.cccd_status.config(text = "Chưa quét CCCD", foreground="#bdbdbd")
                 messagebox.showerror("Lỗi", "Không thể quét mã QR CCCD. Vui lòng thử lại.")
 
         except Exception as e:
             logger.error(f"Lỗi khi quét CCCD: {e}")
+            self.cccd_status.config(text = "Chưa quét CCCD", foreground="#bdbdbd")
             messagebox.showerror("Lỗi", f"Lỗi khi quét CCCD: {str(e)}")
 
     def validate(self):
