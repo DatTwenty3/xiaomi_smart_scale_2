@@ -1,7 +1,7 @@
+"""
+Ví dụ sử dụng MQTTClient để publish dữ liệu telemetry lên MQTT Broker theo chu kỳ.
+"""
 import time
-
-from paho.mqtt.client import PUBLISH
-
 from mqtt_client_handler import MQTTClient
 
 # Thông tin cấu hình
@@ -23,10 +23,22 @@ measurements = {
     'light': 100
 }
 
-while True:
-    mqtt_client.publish(PUBLISH_TOPIC, measurements)
-    # Cập nhật giá trị hoặc thực hiện các thao tác khác nếu cần
-    measurements['temperature'] += 1
-    measurements['humidity'] += 1
-    measurements['light'] += 1
-    time.sleep(5)
+def publish_loop():
+    """
+    Vòng lặp gửi dữ liệu telemetry lên MQTT Broker.
+    """
+    try:
+        while True:
+            mqtt_client.publish(PUBLISH_TOPIC, measurements)
+            # Cập nhật giá trị hoặc thực hiện các thao tác khác nếu cần
+            measurements['temperature'] += 1
+            measurements['humidity'] += 1
+            measurements['light'] += 1
+            time.sleep(5)
+    except KeyboardInterrupt:
+        print("Dừng publish dữ liệu.")
+    except Exception as e:
+        print(f"Lỗi trong quá trình publish: {e}")
+
+if __name__ == "__main__":
+    publish_loop()

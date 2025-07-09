@@ -6,7 +6,8 @@ from typing import Dict, Any, Optional, List, Tuple
 import logging
 from pathlib import Path
 
-# Configure logging
+# Cấu hình logger cơ bản nếu chưa có
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuration
@@ -525,25 +526,58 @@ class CSVDataManager:
 
 # Convenience functions for backward compatibility
 def update_csv(user_info: Dict[str, Any], measurements: Dict[str, Any], create_backup: bool = False) -> bool:
-    """Convenience function for updating CSV - maintains backward compatibility"""
-    manager = CSVDataManager()
-    success, messages = manager.update_csv(user_info, measurements, create_backup)
-    return success
+    """
+    Cập nhật file CSV với thông tin người dùng và các chỉ số đo.
+    Args:
+        user_info (dict): Thông tin người dùng
+        measurements (dict): Các chỉ số đo
+        create_backup (bool): Có tạo file backup không
+    Returns:
+        bool: True nếu thành công, False nếu lỗi
+    """
+    try:
+        manager = CSVDataManager()
+        success, errors = manager.update_csv(user_info, measurements, create_backup)
+        if not success:
+            logger.error(f"Lỗi cập nhật CSV: {errors}")
+        return success
+    except Exception as e:
+        logger.error(f"Lỗi update_csv: {e}")
+        return False
 
 
 def read_csv_data(file_path: Optional[str] = None, fix_corrupted: bool = True) -> pd.DataFrame:
-    """Convenience function for reading CSV - maintains backward compatibility"""
-    config = CSV_CONFIG.copy()
-    if file_path:
-        config['file_path'] = file_path
-    manager = CSVDataManager(config)
-    return manager.read_csv_data(fix_corrupted)
+    """
+    Đọc dữ liệu từ file CSV.
+    Args:
+        file_path (str, optional): Đường dẫn file CSV
+        fix_corrupted (bool): Có tự động sửa file lỗi không
+    Returns:
+        pd.DataFrame: Dữ liệu đọc được
+    """
+    try:
+        manager = CSVDataManager({'file_path': file_path} if file_path else None)
+        return manager.read_csv_data(fix_corrupted=fix_corrupted)
+    except Exception as e:
+        logger.error(f"Lỗi đọc CSV: {e}")
+        return pd.DataFrame()
 
 
 def get_user_history(name: str, limit: Optional[int] = None) -> pd.DataFrame:
-    """Convenience function for getting user history - maintains backward compatibility"""
-    manager = CSVDataManager()
-    return manager.get_user_history(name, limit)
+    """
+    Lấy lịch sử đo của người dùng theo tên.
+    Args:
+        name (str): Tên người dùng
+        limit (int, optional): Số bản ghi tối đa
+    Returns:
+        pd.DataFrame: Lịch sử đo
+    """
+    try:
+        manager = CSVDataManager()
+        return manager.get_user_history(name, limit)
+    except Exception as e:
+        logger.error(f"Lỗi lấy lịch sử người dùng: {e}")
+        return pd.DataFrame()
 
 
 # Example usage and testing

@@ -72,14 +72,17 @@ health_data = iu.HealthDataManager()
 # ==============================================================================
 
 class UserInfoDialog(simpledialog.Dialog):
-    """Dialog for user information input with CCCD QR scanner"""
-
+    """
+    Dialog nhập thông tin người dùng, hỗ trợ quét mã QR CCCD và nhập chiều cao, hệ số hoạt động.
+    """
     def __init__(self, parent):
         self.cccd_data = None
         super().__init__(parent)
 
     def body(self, master):
-        """Create dialog body"""
+        """
+        Tạo giao diện nhập thông tin người dùng.
+        """
         self.title("Nhập thông tin cá nhân")
 
         # CCCD QR Scanner section
@@ -146,7 +149,9 @@ class UserInfoDialog(simpledialog.Dialog):
         return self.scan_button
 
     def scan_cccd(self):
-        """Handle CCCD QR code scanning"""
+        """
+        Xử lý sự kiện quét mã QR CCCD.
+        """
         try:
             # Call the QR scanner function
             self.cccd_data = scan_cccd_qr()
@@ -168,10 +173,13 @@ class UserInfoDialog(simpledialog.Dialog):
                 messagebox.showerror("Lỗi", "Không thể quét mã QR CCCD. Vui lòng thử lại.")
 
         except Exception as e:
+            logger.error(f"Lỗi khi quét CCCD: {e}")
             messagebox.showerror("Lỗi", f"Lỗi khi quét CCCD: {str(e)}")
 
     def validate(self):
-        """Validate input before applying"""
+        """
+        Kiểm tra hợp lệ trước khi xác nhận thông tin.
+        """
         if not self.cccd_data:
             messagebox.showerror("Lỗi", "Vui lòng quét CCCD trước!")
             return False
@@ -194,7 +202,9 @@ class UserInfoDialog(simpledialog.Dialog):
         return True
 
     def apply(self):
-        """Apply user input"""
+        """
+        Lưu thông tin người dùng sau khi xác nhận.
+        """
         if self.cccd_data:
             # Calculate age from date of birth
             age = cm.calculate_age(self.cccd_data['dob'])
@@ -231,7 +241,7 @@ def process_weight_data(weight, is_fake=False):
 
     user_info['weight'] = weight
     weight_source = "(FAKE DATA)" if is_fake else ""
-    print(f"Cân nặng: {weight} kg {weight_source}")
+    logger.info(f"Cân nặng: {weight} kg {weight_source}")
 
     # Calculate body composition
     body_composition = cbc.calculate_body_metrics(user_info)
@@ -248,7 +258,7 @@ def process_weight_data(weight, is_fake=False):
     cu.update_csv(user_info, health_data.get_body_composition())
 
     ai_recommend = ai_rcm.ai_health_recommendations(health_data.get_body_composition())
-    print(ai_recommend)
+    logger.info(ai_recommend)
 
     # Optional: Voice recommendations (commented out)
     # read_recommend_vietnamese(user_info, ai_recommend)
