@@ -71,9 +71,43 @@ health_data = iu.HealthDataManager()
 # USER INTERFACE
 # ==============================================================================
 
+class ModernButton(tk.Button):
+    """Custom button với thiết kế hiện đại"""
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.configure(
+            relief="flat",
+            borderwidth=0,
+            font=("Segoe UI", 10, "bold"),
+            cursor="hand2",
+            activebackground="#1565c0",
+            activeforeground="white"
+        )
+        self.bind("<Enter>", self.on_enter)
+        self.bind("<Leave>", self.on_leave)
+        
+    def on_enter(self, e):
+        self.configure(background="#1565c0")
+        
+    def on_leave(self, e):
+        self.configure(background="#1976d2")
+
+class ModernEntry(tk.Entry):
+    """Custom entry với thiết kế hiện đại"""
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.configure(
+            relief="flat",
+            borderwidth=2,
+            font=("Segoe UI", 10),
+            highlightthickness=1,
+            highlightcolor="#1976d2",
+            highlightbackground="#e0e0e0"
+        )
+
 class UserInfoDialog(simpledialog.Dialog):
     """
-    Dialog nhập thông tin người dùng, hỗ trợ quét mã QR CCCD và nhập chiều cao, hệ số hoạt động.
+    Dialog nhập thông tin người dùng với giao diện hiện đại, hỗ trợ quét mã QR CCCD và nhập chiều cao, hệ số hoạt động.
     """
     def __init__(self, parent):
         self.cccd_data = None
@@ -81,79 +115,247 @@ class UserInfoDialog(simpledialog.Dialog):
 
     def body(self, master):
         """
-        Giao diện phẳng, không viền, không nổi khối.
+        Giao diện hiện đại với Material Design colors và typography.
         """
         self.title("Nhập thông tin cá nhân")
-
-        # Style phẳng, không viền
+        
+        # Cấu hình style hiện đại
         style = ttk.Style()
         style.theme_use('clam')
-        style.configure('TFrame', background='#f4f6fb')
-        style.configure('TLabel', background='#f4f6fb', font=("Segoe UI", 10))
-        style.configure('Header.TLabel', font=("Segoe UI", 12, "bold"), background='#f4f6fb', foreground='#1976d2')
-        style.configure('TButton', font=("Segoe UI", 10, "bold"), padding=8, relief="flat", background="#1976d2", foreground="white", borderwidth=0)
-        style.map('TButton', background=[('active', '#1565c0')])
-        style.configure('TEntry', padding=6, relief="flat", borderwidth=0)
-        style.configure('TOptionMenu', padding=6, relief="flat", borderwidth=0)
+        
+        # Colors theo Material Design
+        primary_color = "#1976d2"
+        primary_dark = "#1565c0"
+        primary_light = "#bbdefb"
+        accent_color = "#ff9800"
+        surface_color = "#ffffff"
+        background_color = "#f5f5f5"
+        text_primary = "#212121"
+        text_secondary = "#757575"
+        success_color = "#4caf50"
+        error_color = "#f44336"
+        
+        # Configure styles
+        style.configure('Modern.TFrame', background=surface_color)
+        style.configure('Modern.TLabel', 
+                       background=surface_color, 
+                       font=("Segoe UI", 10),
+                       foreground=text_primary)
+        style.configure('Header.TLabel', 
+                       font=("Segoe UI", 18, "bold"), 
+                       background=surface_color, 
+                       foreground=primary_color)
+        style.configure('Subheader.TLabel', 
+                       font=("Segoe UI", 12, "bold"), 
+                       background=surface_color, 
+                       foreground=text_primary)
+        style.configure('Info.TLabel', 
+                       font=("Segoe UI", 9), 
+                       background=surface_color, 
+                       foreground=text_secondary)
+        style.configure('Success.TLabel', 
+                       font=("Segoe UI", 10), 
+                       background=surface_color, 
+                       foreground=success_color)
+        style.configure('Modern.TButton', 
+                       font=("Segoe UI", 10, "bold"), 
+                       padding=(16, 12), 
+                       relief="flat", 
+                       background=primary_color, 
+                       foreground="white", 
+                       borderwidth=0)
+        style.map('Modern.TButton', 
+                  background=[('active', primary_dark), ('pressed', primary_dark)])
+        style.configure('Modern.TEntry', 
+                       padding=(12, 8), 
+                       relief="flat", 
+                       borderwidth=1)
+        style.configure('Modern.TOptionMenu', 
+                       padding=(12, 8), 
+                       relief="flat", 
+                       borderwidth=1)
 
-        master.configure(bg='#f4f6fb')
-
-        # Khung tổng (dùng Frame, không LabelFrame)
-        container = ttk.Frame(master, style='TFrame', padding=(24, 24, 24, 16))
-        container.pack(fill="both", expand=True)
-
-        # Tiêu đề
-        ttk.Label(container, text="Nhập thông tin cá nhân", style='Header.TLabel').pack(anchor="w", pady=(0, 18))
-
-        # Khung quét CCCD
-        cccd_frame = ttk.Frame(container, style='TFrame')
-        cccd_frame.pack(fill="x", pady=(0, 12))
-
-        self.scan_button = ttk.Button(cccd_frame, text="Quét CCCD", command=self.scan_cccd, style='TButton')
-        self.scan_button.pack(side="left", pady=(0, 0))
-
-        self.cccd_status = ttk.Label(cccd_frame, text="Chưa quét CCCD", foreground="#bdbdbd", style='TLabel')
-        self.cccd_status.pack(side="left", padx=(12, 0))
-
-        # Thông tin từ CCCD
-        info_frame = ttk.Frame(container, style='TFrame')
-        info_frame.pack(fill="x", pady=(0, 12))
-
-        ttk.Label(info_frame, text="Họ tên:").grid(row=0, column=0, sticky="w", pady=2)
-        self.name_label = ttk.Label(info_frame, text="", width=30, anchor="w", style='TLabel')
-        self.name_label.grid(row=0, column=1, padx=5, sticky="w", pady=2)
-
-        ttk.Label(info_frame, text="Ngày sinh:").grid(row=1, column=0, sticky="w", pady=2)
-        self.dob_label = ttk.Label(info_frame, text="", width=30, anchor="w", style='TLabel')
-        self.dob_label.grid(row=1, column=1, padx=5, sticky="w", pady=2)
-
-        ttk.Label(info_frame, text="Giới tính:").grid(row=2, column=0, sticky="w", pady=2)
-        self.gender_label = ttk.Label(info_frame, text="", width=30, anchor="w", style='TLabel')
-        self.gender_label.grid(row=2, column=1, padx=5, sticky="w", pady=2)
-
-        # Thông tin bổ sung
-        input_frame = ttk.Frame(container, style='TFrame')
-        input_frame.pack(fill="x", pady=(0, 12))
-
-        ttk.Label(input_frame, text="Chiều cao (cm):").grid(row=0, column=0, sticky="w", pady=2)
-        self.height_entry = ttk.Entry(input_frame, width=30)
-        self.height_entry.grid(row=0, column=1, padx=5, sticky="w", pady=2)
-
-        ttk.Label(input_frame, text="Hệ số hoạt động:").grid(row=1, column=0, sticky="w", pady=2)
+        # Cấu hình master window
+        master.configure(bg=background_color)
+        
+        # Container chính với shadow effect
+        main_container = tk.Frame(master, bg=surface_color, relief="flat", bd=0)
+        main_container.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        # Header section
+        header_frame = tk.Frame(main_container, bg=surface_color, height=80)
+        header_frame.pack(fill="x", pady=(0, 20))
+        header_frame.pack_propagate(False)
+        
+        # Icon và title
+        title_label = tk.Label(header_frame, 
+                              text="⚖️", 
+                              font=("Segoe UI", 24), 
+                              bg=surface_color, 
+                              fg=primary_color)
+        title_label.pack(side="left", padx=(20, 10))
+        
+        title_text = tk.Label(header_frame, 
+                             text="Thông tin cá nhân", 
+                             font=("Segoe UI", 18, "bold"), 
+                             bg=surface_color, 
+                             fg=primary_color)
+        title_text.pack(side="left", pady=20)
+        
+        # Content container
+        content_frame = tk.Frame(main_container, bg=surface_color)
+        content_frame.pack(fill="both", expand=True, padx=20)
+        
+        # Section 1: CCCD Scanning
+        self.create_section_header(content_frame, "📱 Quét CCCD", 0)
+        
+        cccd_frame = tk.Frame(content_frame, bg=surface_color)
+        cccd_frame.grid(row=1, column=0, sticky="ew", pady=(0, 20))
+        
+        self.scan_button = ModernButton(cccd_frame, 
+                                       text="Quét CCCD", 
+                                       command=self.scan_cccd,
+                                       bg=primary_color,
+                                       fg="white",
+                                       font=("Segoe UI", 11, "bold"),
+                                       padx=20,
+                                       pady=10)
+        self.scan_button.pack(side="left")
+        
+        self.cccd_status = tk.Label(cccd_frame, 
+                                   text="Chưa quét CCCD", 
+                                   font=("Segoe UI", 10),
+                                   fg=text_secondary,
+                                   bg=surface_color)
+        self.cccd_status.pack(side="left", padx=(20, 0), pady=10)
+        
+        # Section 2: CCCD Information
+        self.create_section_header(content_frame, "👤 Thông tin từ CCCD", 2)
+        
+        info_frame = tk.Frame(content_frame, bg=surface_color)
+        info_frame.grid(row=3, column=0, sticky="ew", pady=(0, 20))
+        
+        # Grid layout cho thông tin
+        labels = ["Họ tên:", "Ngày sinh:", "Giới tính:"]
+        self.info_labels = {}
+        
+        for i, label_text in enumerate(labels):
+            label = tk.Label(info_frame, 
+                            text=label_text, 
+                            font=("Segoe UI", 10, "bold"),
+                            bg=surface_color, 
+                            fg=text_primary)
+            label.grid(row=i, column=0, sticky="w", pady=8, padx=(0, 20))
+            
+            value_label = tk.Label(info_frame, 
+                                  text="", 
+                                  font=("Segoe UI", 10),
+                                  bg=surface_color, 
+                                  fg=text_secondary,
+                                  width=30,
+                                  anchor="w")
+            value_label.grid(row=i, column=1, sticky="w", pady=8)
+            self.info_labels[label_text] = value_label
+        
+        # Section 3: Additional Information
+        self.create_section_header(content_frame, "📏 Thông tin bổ sung", 4)
+        
+        input_frame = tk.Frame(content_frame, bg=surface_color)
+        input_frame.grid(row=5, column=0, sticky="ew", pady=(0, 20))
+        
+        # Height input
+        height_label = tk.Label(input_frame, 
+                               text="Chiều cao (cm):", 
+                               font=("Segoe UI", 10, "bold"),
+                               bg=surface_color, 
+                               fg=text_primary)
+        height_label.grid(row=0, column=0, sticky="w", pady=12, padx=(0, 20))
+        
+        self.height_entry = ModernEntry(input_frame, width=25, font=("Segoe UI", 10))
+        self.height_entry.grid(row=0, column=1, sticky="w", pady=12)
+        
+        # Activity level
+        activity_label = tk.Label(input_frame, 
+                                 text="Hệ số hoạt động:", 
+                                 font=("Segoe UI", 10, "bold"),
+                                 bg=surface_color, 
+                                 fg=text_primary)
+        activity_label.grid(row=1, column=0, sticky="w", pady=12, padx=(0, 20))
+        
         self.activity_var = tk.StringVar()
         self.activity_var.set("Ít vận động")
-        self.activity_menu = ttk.OptionMenu(
-            input_frame, self.activity_var, "Ít vận động", *ACTIVITY_LEVELS.keys()
+        
+        # Custom styled OptionMenu
+        activity_frame = tk.Frame(input_frame, bg=surface_color)
+        activity_frame.grid(row=1, column=1, sticky="w", pady=12)
+        
+        self.activity_menu = tk.OptionMenu(activity_frame, 
+                                          self.activity_var, 
+                                          "Ít vận động", 
+                                          *ACTIVITY_LEVELS.keys(),
+                                          command=self.on_activity_change)
+        self.activity_menu.configure(
+            font=("Segoe UI", 10),
+            bg=surface_color,
+            fg=text_primary,
+            relief="flat",
+            borderwidth=1,
+            highlightthickness=1,
+            highlightcolor=primary_color,
+            highlightbackground="#e0e0e0",
+            width=20
         )
-        self.activity_menu.grid(row=1, column=1, sticky="w", padx=5, pady=2)
-
-        # Ghi chú
-        note_frame = ttk.Frame(container, style='TFrame')
-        note_frame.pack(fill="x", pady=(0, 0))
-        note_text = "Lưu ý: Cân nặng sẽ được đo tự động từ thiết bị cân thông minh"
-        ttk.Label(note_frame, text=note_text, font=("Segoe UI", 9, "italic"), foreground="#1976d2", style='TLabel').pack(anchor="w")
-
+        self.activity_menu.pack()
+        
+        # Section 4: Note
+        note_frame = tk.Frame(content_frame, bg=surface_color)
+        note_frame.grid(row=6, column=0, sticky="ew", pady=(20, 0))
+        
+        note_text = "💡 Lưu ý: Cân nặng sẽ được đo tự động từ thiết bị cân thông minh"
+        note_label = tk.Label(note_frame, 
+                             text=note_text, 
+                             font=("Segoe UI", 9, "italic"), 
+                             fg=primary_color, 
+                             bg=surface_color,
+                             wraplength=400,
+                             justify="left")
+        note_label.pack(anchor="w")
+        
+        # Configure grid weights
+        content_frame.columnconfigure(0, weight=1)
+        
         return self.scan_button
+
+    def create_section_header(self, parent, text, row):
+        """Tạo header cho mỗi section"""
+        header = tk.Label(parent, 
+                         text=text, 
+                         font=("Segoe UI", 12, "bold"), 
+                         bg=parent.cget("bg"), 
+                         fg="#1976d2",
+                         anchor="w")
+        header.grid(row=row, column=0, sticky="ew", pady=(20, 10))
+        
+        # Separator line
+        separator = tk.Frame(parent, height=2, bg="#e0e0e0")
+        separator.grid(row=row+1, column=0, sticky="ew", pady=(0, 10))
+
+    def on_activity_change(self, *args):
+        """Xử lý khi thay đổi activity level"""
+        pass
+
+    def translate_gender(self, gender):
+        """Chuyển đổi giới tính từ tiếng Anh sang tiếng Việt"""
+        gender_mapping = {
+            'male': 'Nam',
+            'female': 'Nữ',
+            'm': 'Nam',
+            'f': 'Nữ',
+            'nam': 'Nam',
+            'nữ': 'Nữ',
+            'nu': 'Nữ'
+        }
+        return gender_mapping.get(gender.lower(), gender)
 
     def scan_cccd(self):
         """
@@ -165,24 +367,34 @@ class UserInfoDialog(simpledialog.Dialog):
 
             if self.cccd_data:
                 # Update the display labels
-                self.name_label.config(text = self.cccd_data.get('name', ''))
-                self.dob_label.config(text = self.cccd_data.get('dob', ''))
-                self.gender_label.config(text = self.cccd_data.get('gender', ''))
+                self.info_labels["Họ tên:"].config(text=self.cccd_data.get('name', ''))
+                self.info_labels["Ngày sinh:"].config(text=self.cccd_data.get('dob', ''))
+                self.info_labels["Giới tính:"].config(text=self.translate_gender(self.cccd_data.get('gender', '')))
 
-                # Update status
-                self.cccd_status.config(text = "✓ Đã quét CCCD thành công", foreground="#43a047")
+                # Update status với icon và màu
+                self.cccd_status.config(
+                    text="✓ Đã quét CCCD thành công", 
+                    fg="#4caf50",
+                    font=("Segoe UI", 10, "bold")
+                )
 
                 # Enable input fields
-                self.height_entry.config(state = "normal")
+                self.height_entry.config(state="normal")
 
                 messagebox.showinfo("Thành công", "Đã quét CCCD thành công!\nVui lòng nhập chiều cao.")
             else:
-                self.cccd_status.config(text = "Chưa quét CCCD", foreground="#bdbdbd")
+                self.cccd_status.config(
+                    text="❌ Chưa quét CCCD", 
+                    fg="#f44336"
+                )
                 messagebox.showerror("Lỗi", "Không thể quét mã QR CCCD. Vui lòng thử lại.")
 
         except Exception as e:
             logger.error(f"Lỗi khi quét CCCD: {e}")
-            self.cccd_status.config(text = "Chưa quét CCCD", foreground="#bdbdbd")
+            self.cccd_status.config(
+                text="❌ Lỗi khi quét CCCD", 
+                fg="#f44336"
+            )
             messagebox.showerror("Lỗi", f"Lỗi khi quét CCCD: {str(e)}")
 
     def validate(self):
