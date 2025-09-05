@@ -13,7 +13,6 @@ import calc_body_composition as cbc
 import info_user as iu
 import ai_recommendations as ai_rcm
 import data_parser as parser
-import oneleg_standing_timer as ast
 from mqtt_client_handler import MQTTClient
 from ai_voice import read_recommend_vietnamese
 from bleak import BleakClient, BleakScanner
