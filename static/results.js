@@ -48,6 +48,9 @@ function displayUserInfo(userInfo) {
             <p><strong>Cân nặng:</strong> ${userInfo.weight} kg</p>
             <p><strong>Hệ số hoạt động:</strong> ${userInfo.activity_factor}</p>
         </div>
+        <div class="col-12 mt-3">
+            <p><strong>Địa chỉ:</strong> ${userInfo.address || 'Không có'}</p>
+        </div>
     `;
     
     userInfoDiv.innerHTML = html;

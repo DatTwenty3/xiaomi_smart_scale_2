@@ -16,10 +16,11 @@ Web application này đóng vai trò là front-end cho dự án Xiaomi Smart Sca
 - Chiều cao, cân nặng
 - Hệ số hoạt động (từ ít vận động đến rất nhiều vận động)
 - Số CCCD (tùy chọn)
+- Địa chỉ thường trú (tùy chọn)
 
 ### 2. Quét QR CCCD
 - Tích hợp camera để quét mã QR trên CCCD
-- Tự động trích xuất thông tin: họ tên, ngày sinh, giới tính, số CCCD
+- Tự động trích xuất thông tin: họ tên, ngày sinh, giới tính, số CCCD, địa chỉ
 - Chỉ cần nhập thêm chiều cao, cân nặng và hệ số hoạt động
 
 ### 3. Tính toán các chỉ số

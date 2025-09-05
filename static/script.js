@@ -174,6 +174,7 @@ function displayCCCDInfo(data) {
     document.getElementById('cccdDob').textContent = data.dob || '-';
     document.getElementById('cccdGender').textContent = data.gender === 'male' ? 'Nam' : 'Nữ';
     document.getElementById('cccdId').textContent = data.cccd_id || '-';
+    document.getElementById('cccdAddress').textContent = data.address || '-';
     
     // Hiển thị card thông tin CCCD
     document.getElementById('cccdInfo').style.display = 'block';
@@ -298,7 +299,8 @@ function getManualFormData() {
         height: parseFloat(document.getElementById('manualHeight').value),
         weight: parseFloat(document.getElementById('manualWeight').value),
         activity_factor: parseFloat(document.getElementById('manualActivity').value),
-        cccd_id: document.getElementById('manualCccd').value
+        cccd_id: document.getElementById('manualCccd').value,
+        address: document.getElementById('manualAddress').value
     };
 }
 
@@ -323,18 +325,20 @@ function displayResults(result) {
                 <h6 class="text-primary mb-3">
                     <i class="fas fa-user me-2"></i>Thông tin cá nhân
                 </h6>
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Họ tên:</strong> ${userInfo.name}</p>
-                        <p><strong>Tuổi:</strong> ${userInfo.age} tuổi</p>
-                        <p><strong>Giới tính:</strong> ${userInfo.gender === 'male' ? 'Nam' : 'Nữ'}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Chiều cao:</strong> ${userInfo.height} cm</p>
-                        <p><strong>Cân nặng:</strong> ${userInfo.weight} kg</p>
-                        <p><strong>Hệ số hoạt động:</strong> ${userInfo.activity_factor}</p>
-                    </div>
-                </div>
+                        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Họ tên:</strong> ${userInfo.name}</p>
+                <p><strong>Tuổi:</strong> ${userInfo.age} tuổi</p>
+                <p><strong>Giới tính:</strong> ${userInfo.gender === 'male' ? 'Nam' : 'Nữ'}</p>
+                <p><strong>Địa chỉ:</strong> ${userInfo.address || 'Không có'}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Chiều cao:</strong> ${userInfo.height} cm</p>
+                <p><strong>Cân nặng:</strong> ${userInfo.weight} kg</p>
+                <p><strong>Hệ số hoạt động:</strong> ${userInfo.activity_factor}</p>
+                <p><strong>Số CCCD:</strong> ${userInfo.cccd_id || 'Không có'}</p>
+            </div>
+        </div>
             </div>
         </div>
         
