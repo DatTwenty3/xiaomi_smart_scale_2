@@ -1,0 +1,293 @@
+/* Custom CSS cho Xiaomi Smart Scale Web App */
+
+:root {
+    --primary-color: #1976d2;
+    --primary-dark: #1565c0;
+    --primary-light: #bbdefb;
+    --accent-color: #ff9800;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --info-color: #2196f3;
+    --light-color: #f5f5f5;
+    --dark-color: #212121;
+    --text-secondary: #757575;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+/* Card styling */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    border: none;
+    padding: 1.5rem;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    padding: 0.75rem 1.5rem;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(45deg, var(--success-color), #388e3c);
+    border: none;
+}
+
+.btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* Form styling */
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 2px solid #e0e0e0;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Tab styling */
+.nav-tabs {
+    border-bottom: 3px solid #e0e0e0;
+    margin-bottom: 2rem;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    border-radius: 10px 10px 0 0;
+    margin-right: 0.5rem;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.nav-tabs .nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* QR Scanner styling */
+.qr-scanner-container {
+    padding: 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 15px;
+    border: 2px dashed var(--primary-color);
+}
+
+#qrStatus .badge {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+}
+
+/* Results styling */
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.metric-unit {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Status badges */
+.status-excellent {
+    background-color: var(--success-color) !important;
+}
+
+.status-good {
+    background-color: var(--info-color) !important;
+}
+
+.status-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.status-danger {
+    background-color: var(--danger-color) !important;
+}
+
+/* Loading animation */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    border-radius: 15px 15px 0 0;
+    border: none;
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* Chart container */
+#bodyCompositionChart {
+    max-height: 400px;
+}
+
+/* Print styles */
+@media print {
+    body {
+        background: white !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    .btn {
+        display: none !important;
+    }
+    
+    .navbar {
+        display: none !important;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* Animation classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
