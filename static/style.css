@@ -749,3 +749,150 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-dark);
 }
+
+/* Health Metric Tooltip Styles */
+.health-metric {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.health-metric:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: var(--shadow-xl);
+    z-index: 10;
+}
+
+.health-tooltip {
+    position: fixed;
+    background: var(--bg-primary);
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    box-shadow: var(--shadow-xl);
+    padding: 0;
+    max-width: 400px;
+    min-width: 320px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(20px);
+    pointer-events: none;
+}
+
+.health-tooltip.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.tooltip-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: 16px 16px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.tooltip-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    pointer-events: none;
+}
+
+.tooltip-header h6 {
+    color: white !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.tooltip-body {
+    padding: 1.5rem;
+    background: var(--bg-primary);
+    border-radius: 0 0 16px 16px;
+}
+
+.tooltip-body p {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.tooltip-body p:last-child {
+    margin-bottom: 0;
+}
+
+.tooltip-body strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.tooltip-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid var(--primary-color);
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.health-tooltip.tooltip-bottom .tooltip-arrow {
+    top: -10px;
+    bottom: auto;
+    border-top: none;
+    border-bottom: 10px solid var(--primary-color);
+}
+
+/* Mobile responsive tooltip */
+@media (max-width: 768px) {
+    .health-tooltip {
+        max-width: calc(100vw - 2rem);
+        min-width: calc(100vw - 2rem);
+        left: 1rem !important;
+        right: 1rem !important;
+        transform: translateY(10px) scale(0.95);
+    }
+    
+    .health-tooltip.show {
+        transform: translateY(0) scale(1);
+    }
+    
+    .tooltip-body {
+        padding: 1rem;
+    }
+    
+    .tooltip-header {
+        padding: 1rem 1.25rem;
+    }
+    
+    .tooltip-header h6 {
+        font-size: 1rem;
+    }
+    
+    .tooltip-body p {
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation for metric cards when tooltip is shown */
+.health-metric:hover .metric-value {
+    transform: scale(1.1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.health-metric:hover .metric-label {
+    color: rgba(255, 255, 255, 0.9);
+    transition: color 0.3s ease;
+}
