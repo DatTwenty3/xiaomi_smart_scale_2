@@ -3,11 +3,12 @@ import ai_predict as ap
 import oneleg_timer as ot
 
 
-def calculate_body_metrics(user_info):
+def calculate_body_metrics(user_info, balance_time=None):
     """
     Tính toán các chỉ số thành phần cơ thể dựa trên thông tin người dùng.
     Args:
         user_info (dict): Thông tin người dùng (gender, weight, height, age, activity_factor)
+        balance_time (float, optional): Thời gian thăng bằng đứng 1 chân (giây)
     Returns:
         dict: Kết quả các chỉ số sức khỏe
     """
@@ -22,7 +23,10 @@ def calculate_body_metrics(user_info):
         pp = cm.get_protein_percentage(user_info['gender'], user_info['age'], user_info['weight'], user_info['height'], True)
         vf = cm.get_visceral_fat(user_info['height'], user_info['weight'], user_info['age'])
         iw = cm.get_ideal_weight(user_info['gender'], user_info['height'], True)
-        ols = ot.one_leg_balance_detection()
+        
+        # Sử dụng thời gian thăng bằng từ tham số nếu có, nếu không thì để 0
+        ols = balance_time if balance_time is not None else 0.0
+        
         return {
             'gender': user_info['gender'],
             'weight': user_info['weight'],
@@ -38,7 +42,7 @@ def calculate_body_metrics(user_info):
             'pp': pp,
             'vf': vf,
             'iw': iw,
-            'ols': round(ols['session_duration'], 1)
+            'ols': round(ols, 1)
         }
     except Exception as e:
         print(f"Lỗi tính toán thành phần cơ thể: {e}")

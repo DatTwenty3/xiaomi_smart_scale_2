@@ -96,3 +96,4 @@ pyzbar==0.1.9
 
 # Thêm dependencies cho web app
 Werkzeug==3.0.4
+
