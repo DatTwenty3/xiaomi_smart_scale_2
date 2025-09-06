@@ -513,31 +513,21 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Thêm event listener để cập nhật vị trí tooltip khi scroll
+// Thêm event listener để ẩn tooltip khi scroll
 document.addEventListener('scroll', function() {
     const tooltip = document.getElementById('health-tooltip');
     if (tooltip) {
-        const targetId = tooltip.getAttribute('data-target-id');
-        let targetMetric = null;
-        
-        if (targetId && targetId.startsWith('metric-')) {
-            // Tìm metric theo metric type
-            const metricType = tooltip.getAttribute('data-metric');
-            const healthMetrics = document.querySelectorAll('.health-metric');
-            healthMetrics.forEach(metric => {
-                if (metric.getAttribute('data-metric') === metricType) {
-                    targetMetric = metric;
-                }
-            });
-        } else {
-            // Tìm metric theo ID cụ thể
-            targetMetric = document.getElementById(targetId);
-        }
-        
-        if (targetMetric) {
-            // Cập nhật vị trí tooltip theo vị trí mới của metric
-            updateTooltipPosition(tooltip, targetMetric);
-        }
+        // Ẩn tooltip khi scroll
+        hideTooltip();
+    }
+});
+
+// Thêm event listener để ẩn tooltip khi lăn chuột (wheel)
+document.addEventListener('wheel', function() {
+    const tooltip = document.getElementById('health-tooltip');
+    if (tooltip) {
+        // Ẩn tooltip khi lăn chuột
+        hideTooltip();
     }
 });
 
