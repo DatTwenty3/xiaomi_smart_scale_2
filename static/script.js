@@ -31,6 +31,9 @@ function initializeEventListeners() {
     document.getElementById('viewHistoryBtn').addEventListener('click', viewHistory);
     document.getElementById('refreshHistoryBtn').addEventListener('click', refreshHistory);
     
+    // Activity selector
+    initializeActivitySelector();
+    
     // Weight measurement buttons
     document.getElementById('startWeightBtn').addEventListener('click', startWeightMeasurement);
     document.getElementById('confirmWeightBtn').addEventListener('click', confirmWeight);
@@ -1123,4 +1126,46 @@ function createToastContainer() {
     container.style.zIndex = '9999';
     document.body.appendChild(container);
     return container;
+}
+
+// Activity Selector Functions
+function initializeActivitySelector() {
+    const activityOptions = document.querySelectorAll('.activity-option');
+    const hiddenInput = document.getElementById('activity');
+    
+    // Set default selection
+    activityOptions[0].classList.add('selected');
+    
+    activityOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove selected class from all options
+            activityOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            this.classList.add('selected');
+            
+            // Update hidden input value
+            const value = this.getAttribute('data-value');
+            hiddenInput.value = value;
+            
+            // Add animation effect
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+        
+        // Add hover effects
+        option.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.transform = 'translateY(-2px)';
+            }
+        });
+        
+        option.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.transform = '';
+            }
+        });
+    });
 }
