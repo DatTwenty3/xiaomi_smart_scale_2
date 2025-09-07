@@ -99,6 +99,13 @@ function validateField(event) {
     // Xóa error cũ
     clearFieldError(event);
     
+    // Thêm class has-value nếu có giá trị
+    if (value) {
+        field.classList.add('has-value');
+    } else {
+        field.classList.remove('has-value');
+    }
+    
     if (!value) {
         showFieldError(field, 'Trường này là bắt buộc');
         return false;
@@ -169,8 +176,54 @@ function clearFieldError(event) {
     
     const errorDiv = field.parentNode.querySelector('.invalid-feedback');
     if (errorDiv) {
-        errorDiv.remove();
+        errorDiv.textContent = '';
     }
+}
+
+// Progress Steps Management
+function updateProgressStep(stepNumber) {
+    const steps = document.querySelectorAll('.step');
+    
+    steps.forEach((step, index) => {
+        const stepNum = index + 1;
+        step.classList.remove('active', 'completed');
+        
+        if (stepNum < stepNumber) {
+            step.classList.add('completed');
+        } else if (stepNum === stepNumber) {
+            step.classList.add('active');
+        }
+    });
+}
+
+// Enhanced form validation with visual feedback
+function showFieldError(field, message) {
+    field.classList.add('is-invalid');
+    const feedback = field.parentNode.querySelector('.invalid-feedback');
+    if (feedback) {
+        feedback.textContent = message;
+    }
+}
+
+function showFieldSuccess(field) {
+    field.classList.remove('is-invalid');
+    field.classList.add('is-valid');
+    const feedback = field.parentNode.querySelector('.invalid-feedback');
+    if (feedback) {
+        feedback.textContent = '';
+    }
+}
+
+// Function để cập nhật floating labels khi điền dữ liệu programmatically
+function updateFloatingLabels() {
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    inputs.forEach(input => {
+        if (input.value && input.value.trim() !== '') {
+            input.classList.add('has-value');
+        } else {
+            input.classList.remove('has-value');
+        }
+    });
 }
 
 async function scanQRCode() {
@@ -243,6 +296,9 @@ function fillFormFromCCCD(data) {
             document.getElementById('age').value = age;
         }
     }
+    
+    // Cập nhật floating labels sau khi điền dữ liệu
+    updateFloatingLabels();
 }
 
 function calculateAgeFromDOB(dob) {
@@ -274,6 +330,9 @@ async function calculateMetrics() {
         showNotification('Vui lòng điền đầy đủ thông tin bắt buộc', 'warning');
         return;
     }
+    
+    // Cập nhật progress step sang bước tính toán
+    updateProgressStep(4);
     
     // Hiển thị loading modal
     const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
@@ -348,6 +407,9 @@ function nextStep() {
         showNotification('Vui lòng điền đầy đủ thông tin bắt buộc', 'warning');
         return;
     }
+    
+    // Cập nhật progress step
+    updateProgressStep(2);
     
     // Mở modal đo cân nặng
     const weightModal = new bootstrap.Modal(document.getElementById('weightModal'));
@@ -451,6 +513,9 @@ function confirmWeight() {
             // Hiển thị kết quả cân nặng trên form
             displayWeightOnForm(weight);
             
+            // Cập nhật progress step
+            updateProgressStep(3);
+            
             // Đóng modal đo cân nặng
             const weightModal = bootstrap.Modal.getInstance(document.getElementById('weightModal'));
             if (weightModal) {
@@ -553,6 +618,9 @@ function remeasure() {
     sessionStorage.removeItem('balanceTime');
     sessionStorage.removeItem('testWeight');
     
+    // Reset progress step về bước đo cân
+    updateProgressStep(2);
+    
     showNotification('Đã reset kết quả đo. Bạn có thể đo lại.', 'info');
 }
 
@@ -565,6 +633,9 @@ function remeasure() {
 // ==============================================================================
 
 function openBalanceModal() {
+    // Cập nhật progress step sang bước đo thăng bằng
+    updateProgressStep(3);
+    
     // Đóng modal lựa chọn
     const balanceChoiceModal = bootstrap.Modal.getInstance(document.getElementById('balanceChoiceModal'));
     if (balanceChoiceModal) {
@@ -582,6 +653,9 @@ function openBalanceModal() {
 function skipBalanceTest() {
     // Xóa thời gian thăng bằng khỏi sessionStorage
     sessionStorage.removeItem('balanceTime');
+    
+    // Cập nhật progress step sang bước tính toán
+    updateProgressStep(4);
     
     // Đóng modal lựa chọn
     const balanceChoiceModal = bootstrap.Modal.getInstance(document.getElementById('balanceChoiceModal'));
@@ -617,6 +691,9 @@ function confirmBalanceTest() {
         if (result.success) {
             // Hiển thị kết quả thời gian thăng bằng trên form
             displayBalanceResult(balanceTime);
+            
+            // Cập nhật progress step sang bước tính toán
+            updateProgressStep(4);
             
             // Đóng modal thăng bằng
             const balanceModal = bootstrap.Modal.getInstance(document.getElementById('balanceModal'));
@@ -1080,12 +1157,21 @@ function clearData() {
     sessionStorage.removeItem('testWeight');
     sessionStorage.removeItem('balanceTime');
     
+    // Reset progress step về bước đầu
+    updateProgressStep(1);
+    
     showNotification('Đã xóa dữ liệu', 'info');
 }
 
 function resetForm() {
     document.getElementById('personalInfoForm').reset();
     clearAllFieldErrors();
+    
+    // Reset floating labels
+    updateFloatingLabels();
+    
+    // Reset progress step về bước đầu
+    updateProgressStep(1);
     
     // Ẩn thông tin CCCD
     document.getElementById('cccdInfo').style.display = 'none';
@@ -1105,7 +1191,7 @@ function clearAllFieldErrors() {
         field.classList.remove('is-invalid');
     });
     document.querySelectorAll('.invalid-feedback').forEach(error => {
-        error.remove();
+        error.textContent = '';
     });
 }
 
@@ -1164,14 +1250,26 @@ function fillTestData() {
     // Tạo dữ liệu demo ngẫu nhiên
     const testData = generateRandomTestData();
     
-    // Điền thông tin cá nhân
-    document.getElementById('fullName').value = testData.name;
-    document.getElementById('dateOfBirth').value = testData.dob;
-    document.getElementById('gender').value = testData.gender;
-    document.getElementById('age').value = testData.age;
-    document.getElementById('height').value = testData.height;
-    document.getElementById('cccd').value = testData.cccd;
-    document.getElementById('address').value = testData.address;
+    // Điền thông tin cá nhân và trigger events để cập nhật floating labels
+    const fields = [
+        { id: 'fullName', value: testData.name },
+        { id: 'dateOfBirth', value: testData.dob },
+        { id: 'gender', value: testData.gender },
+        { id: 'age', value: testData.age },
+        { id: 'height', value: testData.height },
+        { id: 'cccd', value: testData.cccd },
+        { id: 'address', value: testData.address }
+    ];
+    
+    fields.forEach(field => {
+        const element = document.getElementById(field.id);
+        if (element) {
+            element.value = field.value;
+        }
+    });
+    
+    // Cập nhật floating labels sau khi điền tất cả dữ liệu
+    updateFloatingLabels();
     
     // Chọn mức độ vận động ngẫu nhiên
     const activityOptions = document.querySelectorAll('.activity-option');
@@ -1189,6 +1287,9 @@ function fillTestData() {
     
     // Lưu dữ liệu vào session để có thể tính toán
     sessionStorage.setItem('testWeight', testData.weight);
+    
+    // Cập nhật progress step sang bước tính toán (vì đã có đầy đủ dữ liệu)
+    updateProgressStep(4);
     
     // Hiển thị nút đo và tính toán
     showMeasurementButtons();

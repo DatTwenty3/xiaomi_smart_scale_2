@@ -81,6 +81,9 @@ const healthMetricsInfo = {
     }
 };
 
+// Khởi tạo Health Data Visualizer
+let healthVisualizer;
+
 document.addEventListener('DOMContentLoaded', function() {
     // Lấy dữ liệu từ sessionStorage
     const resultData = sessionStorage.getItem('calculationResult');
@@ -90,6 +93,10 @@ document.addEventListener('DOMContentLoaded', function() {
         displayDetailedResults(result);
         initializeTooltips();
         initializeHistoryButton();
+        
+        // Khởi tạo visualizer
+        healthVisualizer = new HealthDataVisualizer();
+        healthVisualizer.renderAllCharts(result.body_composition);
     } else {
         // Nếu không có dữ liệu, chuyển về trang chủ
         window.location.href = '/';
