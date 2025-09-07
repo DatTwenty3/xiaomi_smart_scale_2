@@ -166,8 +166,8 @@ def calculate_metrics():
         
         # Thông tin bắt buộc
         height = float(data.get('height', 0))
-        # Lấy cân nặng từ session (đã được xác nhận từ Bluetooth scale)
-        weight = session.get('confirmed_weight')
+        # Lấy cân nặng từ session (đã được xác nhận từ Bluetooth scale) hoặc từ request data (test demo)
+        weight = session.get('confirmed_weight') or data.get('weight')
         if not weight:
             return jsonify({
                 'success': False,
@@ -195,8 +195,8 @@ def calculate_metrics():
         # Lưu thông tin người dùng
         health_data.set_user_info(user_info)
         
-        # Lấy thời gian thăng bằng từ session nếu có
-        balance_time = session.get('balance_time')
+        # Lấy thời gian thăng bằng từ session hoặc từ request data (test demo)
+        balance_time = session.get('balance_time') or data.get('balance_time')
         
         # Tính toán các chỉ số cơ thể
         body_composition = cbc.calculate_body_metrics(user_info, balance_time)

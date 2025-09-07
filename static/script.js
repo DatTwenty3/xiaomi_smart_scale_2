@@ -1,11 +1,21 @@
 // JavaScript cho Xiaomi Smart Scale Web App
 
+// ==============================================================================
+// CONFIGURATION
+// ==============================================================================
+const CONFIG = {
+    SHOW_TEST_BUTTON: true, // Đặt false để ẩn nút Test Demo
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     // Khởi tạo các event listeners
     initializeEventListeners();
     
     // Khởi tạo form validation
     initializeFormValidation();
+    
+    // Cấu hình hiển thị nút Test Demo
+    configureTestButton();
 });
 
 function initializeEventListeners() {
@@ -20,6 +30,11 @@ function initializeEventListeners() {
     
     // Button xóa dữ liệu
     document.getElementById('clearBtn').addEventListener('click', clearData);
+    
+    // Button test demo (chỉ thêm event listener nếu nút được hiển thị)
+    if (CONFIG.SHOW_TEST_BUTTON) {
+        document.getElementById('testBtn').addEventListener('click', fillTestData);
+    }
     
     // Button đo lại
     document.getElementById('remeasureBtn').addEventListener('click', remeasure);
@@ -267,6 +282,18 @@ async function calculateMetrics() {
     try {
         // Lấy dữ liệu từ form
         const formData = getFormData();
+        
+        // Nếu có dữ liệu test, thêm cân nặng và thời gian thăng bằng test vào
+        const testWeight = sessionStorage.getItem('testWeight');
+        const testBalanceTime = sessionStorage.getItem('balanceTime');
+        
+        if (testWeight) {
+            formData.weight = parseFloat(testWeight);
+        }
+        
+        if (testBalanceTime) {
+            formData.balance_time = parseFloat(testBalanceTime);
+        }
         
         const response = await fetch('/api/calculate', {
             method: 'POST',
@@ -528,6 +555,7 @@ function remeasure() {
     
     // Xóa dữ liệu đo khỏi sessionStorage
     sessionStorage.removeItem('balanceTime');
+    sessionStorage.removeItem('testWeight');
     
     showNotification('Đã reset kết quả đo. Bạn có thể đo lại.', 'info');
 }
@@ -1052,6 +1080,10 @@ function clearData() {
         }
     });
     
+    // Xóa dữ liệu test
+    sessionStorage.removeItem('testWeight');
+    sessionStorage.removeItem('balanceTime');
+    
     showNotification('Đã xóa dữ liệu', 'info');
 }
 
@@ -1126,6 +1158,115 @@ function createToastContainer() {
     container.style.zIndex = '9999';
     document.body.appendChild(container);
     return container;
+}
+
+// ==============================================================================
+// TEST DATA FUNCTIONS
+// ==============================================================================
+
+function fillTestData() {
+    // Tạo dữ liệu demo ngẫu nhiên
+    const testData = generateRandomTestData();
+    
+    // Điền thông tin cá nhân
+    document.getElementById('fullName').value = testData.name;
+    document.getElementById('dateOfBirth').value = testData.dob;
+    document.getElementById('gender').value = testData.gender;
+    document.getElementById('age').value = testData.age;
+    document.getElementById('height').value = testData.height;
+    document.getElementById('cccd').value = testData.cccd;
+    document.getElementById('address').value = testData.address;
+    
+    // Chọn mức độ vận động ngẫu nhiên
+    const activityOptions = document.querySelectorAll('.activity-option');
+    const randomActivityIndex = Math.floor(Math.random() * activityOptions.length);
+    activityOptions.forEach(opt => opt.classList.remove('selected'));
+    activityOptions[randomActivityIndex].classList.add('selected');
+    document.getElementById('activity').value = activityOptions[randomActivityIndex].getAttribute('data-value');
+    
+    // Hiển thị cân nặng demo
+    displayWeightOnForm(testData.weight);
+    
+    // Hiển thị thời gian thăng bằng demo (luôn có để test đầy đủ)
+    displayBalanceResult(testData.balanceTime);
+    sessionStorage.setItem('balanceTime', testData.balanceTime);
+    
+    // Lưu dữ liệu vào session để có thể tính toán
+    sessionStorage.setItem('testWeight', testData.weight);
+    
+    // Hiển thị nút đo và tính toán
+    showMeasurementButtons();
+    
+    showNotification('Đã điền dữ liệu demo thành công!', 'success');
+}
+
+function generateRandomTestData() {
+    // Danh sách tên demo
+    const names = [
+        'Nguyễn Văn An', 'Trần Thị Bình', 'Lê Minh Cường', 'Phạm Thị Dung',
+        'Hoàng Văn Em', 'Vũ Thị Phương', 'Đặng Minh Giang', 'Bùi Thị Hoa',
+        'Phan Văn Inh', 'Ngô Thị Kim', 'Dương Minh Long', 'Lý Thị Mai',
+        'Đinh Văn Nam', 'Tôn Thị Oanh', 'Võ Minh Phúc', 'Đỗ Thị Quỳnh'
+    ];
+    
+    // Danh sách địa chỉ demo
+    const addresses = [
+        '123 Nguyễn Huệ, Quận 1, TP.HCM',
+        '456 Lê Lợi, Quận 3, TP.HCM',
+        '789 Điện Biên Phủ, Quận Bình Thạnh, TP.HCM',
+        '321 Cách Mạng Tháng 8, Quận 10, TP.HCM',
+        '654 Võ Văn Tần, Quận 3, TP.HCM',
+        '987 Nguyễn Thị Minh Khai, Quận 1, TP.HCM'
+    ];
+    
+    // Tạo dữ liệu ngẫu nhiên
+    const name = names[Math.floor(Math.random() * names.length)];
+    const gender = Math.random() > 0.5 ? 'male' : 'female';
+    const age = Math.floor(Math.random() * 50) + 20; // 20-70 tuổi
+    const height = (Math.random() * 30 + 150).toFixed(1); // 150-180 cm
+    const weight = (Math.random() * 30 + 50).toFixed(1); // 50-80 kg
+    const balanceTime = (Math.random() * 20 + 5).toFixed(1); // 5-25 giây
+    const address = addresses[Math.floor(Math.random() * addresses.length)];
+    
+    // Tạo ngày sinh từ tuổi
+    const currentYear = new Date().getFullYear();
+    const birthYear = currentYear - age;
+    const birthMonth = Math.floor(Math.random() * 12) + 1;
+    const birthDay = Math.floor(Math.random() * 28) + 1; // Đảm bảo ngày hợp lệ
+    const dob = `${birthDay.toString().padStart(2, '0')}/${birthMonth.toString().padStart(2, '0')}/${birthYear}`;
+    
+    // Tạo số CCCD demo
+    const cccd = Math.floor(Math.random() * 900000000000) + 100000000000; // 12 chữ số
+    
+    return {
+        name: name,
+        dob: dob,
+        gender: gender,
+        age: age,
+        height: parseFloat(height),
+        weight: parseFloat(weight),
+        balanceTime: parseFloat(balanceTime),
+        address: address,
+        cccd: cccd.toString()
+    };
+}
+
+// ==============================================================================
+// CONFIGURATION FUNCTIONS
+// ==============================================================================
+
+function configureTestButton() {
+    const testButton = document.getElementById('testBtn');
+    
+    if (!CONFIG.SHOW_TEST_BUTTON) {
+        // Ẩn nút Test Demo
+        testButton.style.display = 'none';
+        console.log('Test Demo button is hidden (CONFIG.SHOW_TEST_BUTTON = false)');
+    } else {
+        // Hiển thị nút Test Demo
+        testButton.style.display = 'inline-block';
+        console.log('Test Demo button is visible (CONFIG.SHOW_TEST_BUTTON = true)');
+    }
 }
 
 // Activity Selector Functions
