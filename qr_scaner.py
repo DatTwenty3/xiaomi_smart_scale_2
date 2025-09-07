@@ -1,5 +1,5 @@
 """
-Quét mã QR CCCD bằng camera, trích xuất và chuẩn hóa thông tin cá nhân.
+Quét mã QR Căn cước bằng camera, trích xuất và chuẩn hóa thông tin cá nhân.
 """
 import cv2
 import time
@@ -10,16 +10,16 @@ logger = logging.getLogger(__name__)
 
 def scan_cccd_qr():
     """
-    Quét mã QR CCCD và trả về dữ liệu đã phân tích.
+    Quét mã QR Căn cước và trả về dữ liệu đã phân tích.
     Returns:
-        dict: Thông tin CCCD hoặc None nếu thất bại/hủy
+        dict: Thông tin Căn cước hoặc None nếu thất bại/hủy
     """
     cap = None
     try:
         cap = cv2.VideoCapture(0)
         if not cap.isOpened():
             raise RuntimeError("Cannot open camera")
-        logger.info("Camera ready. Point CCCD QR code to camera...")
+        logger.info("Camera ready. Point Căn cước QR code to camera...")
         logger.info("Press 'q' to cancel")
         last_data = ""
         last_time = 0
@@ -38,11 +38,11 @@ def scan_cccd_qr():
                 if data != last_data or (current_time - last_time) > cooldown:
                     parsed_data = _parse_cccd_data(data)
                     if parsed_data:
-                        logger.info("CCCD detected! Processing...")
+                        logger.info("Căn cước detected! Processing...")
                         return parsed_data
                     last_data = data
                     last_time = current_time
-            cv2.imshow('CCCD QR Scanner - Press Q to cancel', frame)
+            cv2.imshow('Căn cước QR Scanner - Press Q to cancel', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 logger.info("Scan cancelled by user")
                 break
@@ -57,7 +57,7 @@ def scan_cccd_qr():
 
 def _parse_cccd_data(data):
     """
-    Phân tích dữ liệu QR CCCD thành dict chuẩn hóa.
+    Phân tích dữ liệu QR Căn cước thành dict chuẩn hóa.
     """
     parts = data.split('|')
     if len(parts) < 6:
@@ -104,10 +104,10 @@ if __name__ == "__main__":
     print(result)
     if result:
         print("\n" + "=" * 50)
-        print("CCCD INFORMATION:")
+        print("CĂN CƯỚC INFORMATION:")
         print("=" * 50)
         for key, value in result.items():
             print(f'{key}: {value}')
         print("=" * 50)
     else:
-        print("No CCCD data found or scan cancelled")
+        print("No Căn cước data found or scan cancelled")

@@ -227,47 +227,9 @@ function updateFloatingLabels() {
 }
 
 async function scanQRCode() {
-    const scanBtn = document.getElementById('scanQrBtn');
-    const statusDiv = document.getElementById('qrStatus');
-    
-    // Disable button và hiển thị loading
-    scanBtn.disabled = true;
-    scanBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang quét...';
-    
-    try {
-        const response = await fetch('/api/scan-cccd', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // Hiển thị thông tin CCCD
-            displayCCCDInfo(result.data);
-            
-            // Điền thông tin vào form
-            fillFormFromCCCD(result.data);
-            
-            // Cập nhật status
-            statusDiv.innerHTML = '<span class="badge bg-success">✓ Đã quét CCCD thành công</span>';
-            
-            showNotification('Quét CCCD thành công!', 'success');
-        } else {
-            statusDiv.innerHTML = '<span class="badge bg-danger">❌ ' + result.message + '</span>';
-            showNotification(result.message, 'error');
-        }
-    } catch (error) {
-        console.error('Error scanning QR:', error);
-        statusDiv.innerHTML = '<span class="badge bg-danger">❌ Lỗi khi quét CCCD</span>';
-        showNotification('Lỗi khi quét CCCD', 'error');
-    } finally {
-        // Reset button
-        scanBtn.disabled = false;
-        scanBtn.innerHTML = '<i class="fas fa-qrcode me-2"></i>Quét QR CCCD để tự động điền thông tin';
-    }
+    // Mở modal QR scanner
+    const qrModal = new bootstrap.Modal(document.getElementById('qrScannerModal'));
+    qrModal.show();
 }
 
 function displayCCCDInfo(data) {
@@ -1407,3 +1369,335 @@ function initializeActivitySelector() {
         });
     });
 }
+
+// ==============================================================================
+// QR SCANNER FUNCTIONS
+// ==============================================================================
+
+// QR Scanner variables
+let qrStream = null;
+let qrVideo = null;
+let qrCanvas = null;
+let qrContext = null;
+let qrScanning = false;
+let qrScanInterval = null;
+
+// Initialize QR Scanner event listeners
+function initializeQRScanner() {
+    // QR Scanner buttons
+    document.getElementById('startQrScannerBtn').addEventListener('click', startQRScanner);
+    document.getElementById('stopQrScannerBtn').addEventListener('click', stopQRScanner);
+    document.getElementById('confirmQrDataBtn').addEventListener('click', confirmQRData);
+    document.getElementById('retryQrScannerBtn').addEventListener('click', retryQRScanner);
+    document.getElementById('retryQrErrorBtn').addEventListener('click', retryQRScanner);
+    document.getElementById('closeQrModal').addEventListener('click', closeQRModal);
+    document.getElementById('closeQrModalFooter').addEventListener('click', closeQRModal);
+    
+    // Get video and canvas elements
+    qrVideo = document.getElementById('qrVideo');
+    qrCanvas = document.getElementById('qrCanvas');
+    qrContext = qrCanvas.getContext('2d');
+}
+
+// Start QR Scanner
+async function startQRScanner() {
+    try {
+        // Show scanning status
+        showQRScannerStatus('running');
+        
+        // Request camera access
+        qrStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment', // Use back camera if available
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        
+        // Set video source
+        qrVideo.srcObject = qrStream;
+        
+        // Wait for video to load
+        qrVideo.onloadedmetadata = function() {
+            qrVideo.play();
+            qrScanning = true;
+            
+            // Start scanning for QR codes
+            startQRCodeDetection();
+        };
+        
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        showQRScannerError('Không thể truy cập camera. Vui lòng cho phép quyền truy cập camera.');
+    }
+}
+
+// Stop QR Scanner
+function stopQRScanner() {
+    qrScanning = false;
+    
+    if (qrScanInterval) {
+        clearInterval(qrScanInterval);
+        qrScanInterval = null;
+    }
+    
+    if (qrStream) {
+        qrStream.getTracks().forEach(track => track.stop());
+        qrStream = null;
+    }
+    
+    if (qrVideo) {
+        qrVideo.srcObject = null;
+    }
+    
+    showQRScannerStatus('status');
+}
+
+// Start QR Code Detection
+function startQRCodeDetection() {
+    qrScanInterval = setInterval(() => {
+        if (qrScanning && qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+            detectQRCode();
+        }
+    }, 100); // Check every 100ms
+}
+
+// Detect QR Code using simple pattern matching
+function detectQRCode() {
+    // Set canvas size to match video
+    qrCanvas.width = qrVideo.videoWidth;
+    qrCanvas.height = qrVideo.videoHeight;
+    
+    // Draw current video frame to canvas
+    qrContext.drawImage(qrVideo, 0, 0, qrCanvas.width, qrCanvas.height);
+    
+    // Get image data
+    const imageData = qrContext.getImageData(0, 0, qrCanvas.width, qrCanvas.height);
+    
+    // Simple QR code detection (this is a basic implementation)
+    // In a real application, you would use a proper QR code library like jsQR
+    const qrData = detectQRCodeFromImageData(imageData);
+    
+    if (qrData) {
+        // QR code detected
+        stopQRScanner();
+        processQRData(qrData);
+    }
+}
+
+// QR code detection using jsQR library
+function detectQRCodeFromImageData(imageData) {
+    try {
+        // Use jsQR library to detect QR code
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        
+        if (code) {
+            console.log('QR Code detected:', code.data);
+            return code.data;
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('Error detecting QR code:', error);
+        return null;
+    }
+}
+
+// Process detected QR data
+async function processQRData(qrData) {
+    try {
+        // Send QR data to backend for parsing
+        const response = await fetch('/api/parse-qr-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                qr_data: qrData
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Show parsed data
+            showQRScannerResult(result.data);
+        } else {
+            showQRScannerError(result.message || 'Không thể phân tích dữ liệu QR');
+        }
+        
+    } catch (error) {
+        console.error('Error processing QR data:', error);
+        showQRScannerError('Lỗi khi xử lý dữ liệu QR');
+    }
+}
+
+// Show QR Scanner Status
+function showQRScannerStatus(status) {
+    // Hide all sections
+    document.getElementById('qrScannerStatus').style.display = 'none';
+    document.getElementById('qrScannerRunning').style.display = 'none';
+    document.getElementById('qrScannerResult').style.display = 'none';
+    document.getElementById('qrScannerError').style.display = 'none';
+    
+    // Show appropriate section
+    if (status === 'running') {
+        document.getElementById('qrScannerRunning').style.display = 'block';
+    } else {
+        document.getElementById('qrScannerStatus').style.display = 'block';
+    }
+}
+
+// Show QR Scanner Result
+function showQRScannerResult(data) {
+    // Hide other sections
+    document.getElementById('qrScannerStatus').style.display = 'none';
+    document.getElementById('qrScannerRunning').style.display = 'none';
+    document.getElementById('qrScannerError').style.display = 'none';
+    
+    // Show result section
+    document.getElementById('qrScannerResult').style.display = 'block';
+    
+    // Display parsed data
+    const resultDataDiv = document.getElementById('qrResultData');
+    resultDataDiv.innerHTML = `
+        <h6><i class="fas fa-id-card me-2"></i>Thông tin từ Căn cước</h6>
+        <div class="row">
+            <div class="col-6">
+                <p><strong>Họ tên:</strong> <span>${data.name || '-'}</span></p>
+                <p><strong>Ngày sinh:</strong> <span>${data.dob || '-'}</span></p>
+                <p><strong>Giới tính:</strong> <span>${data.gender === 'male' ? 'Nam' : data.gender === 'female' ? 'Nữ' : '-'}</span></p>
+            </div>
+            <div class="col-6">
+                <p><strong>Số Căn cước:</strong> <span>${data.cccd_id || '-'}</span></p>
+                <p><strong>Địa chỉ:</strong> <span>${data.address || '-'}</span></p>
+            </div>
+        </div>
+    `;
+    
+    // Store data for confirmation
+    window.currentQRData = data;
+}
+
+// Show QR Scanner Error
+function showQRScannerError(message) {
+    // Hide other sections
+    document.getElementById('qrScannerStatus').style.display = 'none';
+    document.getElementById('qrScannerRunning').style.display = 'none';
+    document.getElementById('qrScannerResult').style.display = 'none';
+    
+    // Show error section
+    document.getElementById('qrScannerError').style.display = 'block';
+    document.getElementById('qrErrorMessage').textContent = message;
+}
+
+// Confirm QR Data and fill form
+function confirmQRData() {
+    if (window.currentQRData) {
+        const data = window.currentQRData;
+        
+        // Fill form fields
+        document.getElementById('fullName').value = data.name || '';
+        document.getElementById('dateOfBirth').value = data.dob || '';
+        document.getElementById('gender').value = data.gender || '';
+        document.getElementById('cccd').value = data.cccd_id || '';
+        document.getElementById('address').value = data.address || '';
+        
+        // Calculate age from date of birth
+        if (data.dob) {
+            const age = calculateAgeFromDOB(data.dob);
+            if (age > 0) {
+                document.getElementById('age').value = age;
+            }
+        }
+        
+        // Show CCCD info section
+        showCCCDInfo(data);
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('qrScannerModal'));
+        modal.hide();
+        
+        // Show success message
+        showNotification('Đã điền thông tin từ Căn cước thành công!', 'success');
+    }
+}
+
+// Retry QR Scanner
+function retryQRScanner() {
+    stopQRScanner();
+    showQRScannerStatus('status');
+}
+
+// Close QR Modal
+function closeQRModal() {
+    stopQRScanner();
+    const modal = bootstrap.Modal.getInstance(document.getElementById('qrScannerModal'));
+    modal.hide();
+}
+
+// Calculate age from date of birth
+function calculateAgeFromDOB(dob) {
+    try {
+        const [day, month, year] = dob.split('/');
+        const birthDate = new Date(year, month - 1, day);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        return age > 0 ? age : 0;
+    } catch (error) {
+        console.error('Error calculating age:', error);
+        return 0;
+    }
+}
+
+// Show CCCD Info section
+function showCCCDInfo(data) {
+    const cccdInfoDiv = document.getElementById('cccdInfo');
+    const qrStatusDiv = document.getElementById('qrStatus');
+    
+    // Update CCCD info display
+    document.getElementById('cccdName').textContent = data.name || '-';
+    document.getElementById('cccdDob').textContent = data.dob || '-';
+    document.getElementById('cccdGender').textContent = data.gender === 'male' ? 'Nam' : data.gender === 'female' ? 'Nữ' : '-';
+    document.getElementById('cccdId').textContent = data.cccd_id || '-';
+    document.getElementById('cccdAddress').textContent = data.address || '-';
+    
+    // Show CCCD info section
+    cccdInfoDiv.style.display = 'block';
+    
+    // Update QR status
+    qrStatusDiv.innerHTML = '<span class="badge bg-success">Đã quét Căn cước thành công</span>';
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Initialize QR Scanner when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeQRScanner();
+});

@@ -2230,3 +2230,194 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Keep original text colors on hover - no color changes */
+
+/* QR Scanner Styles */
+.qr-scanner-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.qr-scanner-container video {
+    width: 100% !important;
+    max-width: 500px;
+    height: auto;
+    min-height: 350px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    object-fit: cover;
+    background: #000;
+}
+
+.qr-scanner-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.qr-scanner-frame {
+    width: 250px;
+    height: 250px;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+}
+
+.qr-scanner-corners {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.corner {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--primary-color);
+}
+
+.corner.top-left {
+    top: -3px;
+    left: -3px;
+    border-right: none;
+    border-bottom: none;
+    border-top-left-radius: 8px;
+}
+
+.corner.top-right {
+    top: -3px;
+    right: -3px;
+    border-left: none;
+    border-bottom: none;
+    border-top-right-radius: 8px;
+}
+
+.corner.bottom-left {
+    bottom: -3px;
+    left: -3px;
+    border-right: none;
+    border-top: none;
+    border-bottom-left-radius: 8px;
+}
+
+.corner.bottom-right {
+    bottom: -3px;
+    right: -3px;
+    border-left: none;
+    border-top: none;
+    border-bottom-right-radius: 8px;
+}
+
+.qr-result-data {
+    background: var(--bg-accent);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 4px solid var(--success-color);
+}
+
+.qr-result-data h6 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.qr-result-data .row {
+    margin-bottom: 0.5rem;
+}
+
+.qr-result-data .col-6 {
+    padding: 0.25rem 0;
+    text-align: left;
+}
+
+.qr-result-data strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.qr-result-data span {
+    color: var(--text-primary);
+}
+
+.qr-result-data p {
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+/* CCCD Info section styling */
+#cccdInfo .card-header h6 {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0;
+}
+
+#cccdInfo .card-body .row .col-md-6 {
+    text-align: left;
+}
+
+#cccdInfo .card-body p {
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+#cccdInfo .card-body strong {
+    text-align: left;
+}
+
+/* QR Scanner Animation - Removed */
+
+/* Mobile responsive for QR scanner */
+@media (max-width: 768px) {
+    .qr-scanner-container {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+    
+    .qr-scanner-container video {
+        max-width: 100%;
+        min-height: 300px;
+        border-radius: 8px;
+    }
+    
+    .qr-scanner-frame {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .corner {
+        width: 25px;
+        height: 25px;
+    }
+}
+
+@media (max-width: 480px) {
+    .qr-scanner-container video {
+        min-height: 250px;
+    }
+    
+    .qr-scanner-frame {
+        width: 180px;
+        height: 180px;
+    }
+    
+    .corner {
+        width: 20px;
+        height: 20px;
+    }
+}

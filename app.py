@@ -119,7 +119,7 @@ def index():
 
 @app.route('/api/scan-cccd', methods=['POST'])
 def scan_cccd():
-    """API endpoint để quét CCCD QR"""
+    """API endpoint để quét Căn cước QR"""
     try:
         # Gọi hàm quét QR từ module Python
         cccd_data = scan_cccd_qr()
@@ -134,13 +134,93 @@ def scan_cccd():
         else:
             return jsonify({
                 'success': False,
-                'message': 'Không thể quét mã QR CCCD'
+                'message': 'Không thể quét mã QR Căn cước'
             })
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': f'Lỗi khi quét CCCD: {str(e)}'
+            'message': f'Lỗi khi quét Căn cước: {str(e)}'
         })
+
+@app.route('/api/parse-qr-data', methods=['POST'])
+def parse_qr_data():
+    """API endpoint để parse dữ liệu QR từ frontend"""
+    try:
+        data = request.get_json()
+        qr_data = data.get('qr_data', '')
+        
+        if not qr_data:
+            return jsonify({
+                'success': False,
+                'message': 'Không có dữ liệu QR để xử lý'
+            })
+        
+        # Sử dụng hàm parse từ qr_scaner.py
+        parsed_data = _parse_cccd_data(qr_data)
+        
+        if parsed_data:
+            # Lưu dữ liệu vào session
+            session['cccd_data'] = parsed_data
+            return jsonify({
+                'success': True,
+                'data': parsed_data
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Không thể phân tích dữ liệu QR Căn cước'
+            })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Lỗi khi phân tích dữ liệu QR: {str(e)}'
+        })
+
+def _parse_cccd_data(data):
+    """
+    Phân tích dữ liệu QR Căn cước thành dict chuẩn hóa.
+    (Copy từ qr_scaner.py)
+    """
+    parts = data.split('|')
+    if len(parts) < 6:
+        return None
+    try:
+        cccd_id = parts[0].strip()
+        cmnd_id = parts[1].strip()
+        name = parts[2].strip()
+        dob_raw = parts[3].strip()
+        gender = parts[4].strip()
+        if gender.lower() == "nam":
+            gender = "male"
+        elif gender.lower() == "nữ" or gender.lower() == "nu":
+            gender = "female"
+        address = parts[5].strip()
+        issue_date_raw = parts[6].strip() if len(parts) > 6 else ""
+        dob_formatted = _format_date(dob_raw)
+        issue_date_formatted = _format_date(issue_date_raw) if issue_date_raw else ""
+        return {
+            "name": name,
+            "dob": dob_formatted,
+            "gender": gender,
+            "cccd_id": cccd_id,
+            "cmnd_id": cmnd_id,
+            "address": address,
+            "issue_date": issue_date_formatted
+        }
+    except (IndexError, ValueError):
+        return None
+
+def _format_date(date_str):
+    """
+    Định dạng ngày từ ddmmyyyy sang dd/mm/yyyy.
+    (Copy từ qr_scaner.py)
+    """
+    if len(date_str) == 8 and date_str.isdigit():
+        day = date_str[:2]
+        month = date_str[2:4]
+        year = date_str[4:8]
+        return f"{day}/{month}/{year}"
+    return date_str
 
 @app.route('/api/calculate', methods=['POST'])
 def calculate_metrics():
