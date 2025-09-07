@@ -10,7 +10,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ffffff;
             min-height: 100vh;
         }
         
@@ -204,7 +204,7 @@
             <!-- Tổng quan dự án -->
             <div class="section">
                 <h2>📋 Tổng quan dự án</h2>
-                <p><strong>Hệ thống chăm sóc sức khỏe điện tử</strong> (Xiaomi Smart Scale) là một hệ thống đo và phân tích thành phần cơ thể toàn diện, tích hợp công nghệ Bluetooth, AI và web application. Dự án cho phép người dùng đo cân nặng tự động từ cân thông minh, quét thông tin từ CCCD, và nhận khuyến nghị sức khỏe từ AI.</p>
+                <p><strong>Xiaomi Smart Scale</strong> là một hệ thống đo và phân tích thành phần cơ thể toàn diện, tích hợp công nghệ Bluetooth, AI và web application. Dự án cho phép người dùng đo cân nặng tự động từ cân thông minh, quét thông tin từ CCCD, và nhận khuyến nghị sức khỏe từ AI.</p>
                 
                 <div class="highlight">
                     <h4>🎯 Mục tiêu chính</h4>
@@ -214,7 +214,7 @@
                 <div class="feature-grid">
                     <div class="feature-card">
                         <h4>🔗 Kết nối Bluetooth</h4>
-                        <p>Hỗ trợ cân Crenot Gofit S2 và Mi Scale 2, đo cân nặng tự động qua Bluetooth</p>
+                        <p>Hỗ trợ cân Crenot Gofit S2 và Mi Scale 2, đo cân nặng tự động qua Bluetooth BLE</p>
                     </div>
                     <div class="feature-card">
                         <h4>📱 Quét CCCD QR</h4>
@@ -229,8 +229,8 @@
                         <p>Sử dụng Google Gemini AI để đưa ra khuyến nghị sức khỏe cá nhân hóa</p>
                     </div>
                     <div class="feature-card">
-                        <h4>🌐 Web Application</h4>
-                        <p>Giao diện web hiện đại với Bootstrap 5, responsive design, Material Design</p>
+                        <h4>🌐 Web & Desktop App</h4>
+                        <p>Flask web app + Tkinter desktop app với Bootstrap 5, responsive design</p>
                     </div>
                     <div class="feature-card">
                         <h4>💾 Lưu trữ dữ liệu</h4>
@@ -326,62 +326,42 @@
                 
                 <h3>📋 Mô tả các module chính</h3>
                 
-                <div class="feature-grid">
-                    <div class="feature-card">
-                        <h4>🌐 Web Application</h4>
-                        <p><strong>app.py:</strong> Flask server với RESTful API</p>
-                        <p><strong>templates/:</strong> HTML templates với Bootstrap</p>
-                        <p><strong>static/:</strong> CSS, JavaScript, biểu đồ</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <h4>🖥️ Desktop Application</h4>
-                        <p><strong>main.py:</strong> Tkinter GUI với Material Design</p>
-                        <p><strong>Custom widgets:</strong> ModernButton, ModernEntry</p>
-                        <p><strong>Event handling:</strong> Asynchronous operations</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <h4>🧮 Calculation Engine</h4>
-                        <p><strong>calc_metrics.py:</strong> Công thức BMI, BMR, TDEE</p>
-                        <p><strong>calc_body_composition.py:</strong> Tổng hợp 11+ chỉ số</p>
-                        <p><strong>Validation:</strong> Range checking, overflow protection</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <h4>🤖 AI & Machine Learning</h4>
-                        <p><strong>ai_predict.py:</strong> ML models với Scikit-learn</p>
-                        <p><strong>ai_recommendations.py:</strong> Google Gemini integration</p>
-                        <p><strong>pkl/:</strong> Serialized models (body_fat prediction)</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <h4>📡 Hardware Integration</h4>
-                        <p><strong>data_parser.py:</strong> Bluetooth data parsing</p>
-                        <p><strong>mqtt_client_handler.py:</strong> IoT connectivity</p>
-                        <p><strong>oneleg_timer.py:</strong> Pose detection với MediaPipe</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <h4>📱 Computer Vision</h4>
-                        <p><strong>qr_scaner.py:</strong> CCCD QR scanning</p>
-                        <p><strong>OpenCV + PyZbar:</strong> Real-time processing</p>
-                        <p><strong>Data extraction:</strong> Vietnamese CCCD format</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <h4>💾 Data Management</h4>
-                        <p><strong>csv_update.py:</strong> CSV data persistence</p>
-                        <p><strong>info_user.py:</strong> User session management</p>
-                        <p><strong>user_data/:</strong> Historical data storage</p>
-                    </div>
-                    
-                    <div class="feature-card">
-                        <h4>🔧 Configuration</h4>
-                        <p><strong>requirements.txt:</strong> Python dependencies</p>
-                        <p><strong>web_requirements.txt:</strong> Web-specific packages</p>
-                        <p><strong>Documentation:</strong> README, Quick Start guides</p>
-                    </div>
+                <div class="file-structure">
+                    <div class="folder">xiaomi_smart_scale/</div>
+                    <div class="file">├── app.py</div> <span class="python"># Flask web application</span><br>
+                    <div class="file">├── main.py</div> <span class="python"># Tkinter desktop application</span><br>
+                    <div class="file">├── ai_predict.py</div> <span class="python"># ML models với Scikit-learn</span><br>
+                    <div class="file">├── ai_recommendations.py</div> <span class="python"># Google Gemini AI</span><br>
+                    <div class="file">├── ai_voice.py</div> <span class="python"># Voice processing</span><br>
+                    <div class="file">├── calc_body_composition.py</div> <span class="python"># Tính toán 11+ chỉ số</span><br>
+                    <div class="file">├── calc_metrics.py</div> <span class="python"># Công thức BMI, BMR, TDEE</span><br>
+                    <div class="file">├── csv_update.py</div> <span class="python"># CSV data persistence</span><br>
+                    <div class="file">├── data_parser.py</div> <span class="python"># Bluetooth data parsing</span><br>
+                    <div class="file">├── info_user.py</div> <span class="python"># User session management</span><br>
+                    <div class="file">├── mqtt_client_handler.py</div> <span class="python"># IoT connectivity</span><br>
+                    <div class="file">├── oneleg_timer.py</div> <span class="python"># Pose detection với MediaPipe</span><br>
+                    <div class="file">├── qr_scaner.py</div> <span class="python"># CCCD QR scanning</span><br>
+                    <div class="file">├── requirements.txt</div> <span class="python"># Python dependencies</span><br>
+                    <div class="file">├── web_requirements.txt</div> <span class="python"># Web-specific packages</span><br>
+                    <div class="file">├── README_WEB_APP.md</div> <span class="python"># Web app documentation</span><br>
+                    <div class="file">├── QUICK_START.md</div> <span class="python"># Quick start guide</span><br>
+                    <div class="file">├── project_flowchart.html</div> <span class="html"># Project documentation</span><br>
+                    <div class="folder">├── pkl/</div><br>
+                    <div class="file">│   ├── body_fat.pkl</div> <span class="python"># ML model for body fat</span><br>
+                    <div class="file">│   └── weight-height.pkl</div> <span class="python"># ML model for weight-height</span><br>
+                    <div class="folder">├── templates/</div><br>
+                    <div class="file">│   ├── index.html</div> <span class="html"># Main page</span><br>
+                    <div class="file">│   └── results.html</div> <span class="html"># Results page</span><br>
+                    <div class="folder">├── static/</div><br>
+                    <div class="file">│   ├── style.css</div> <span class="css"># CSS styling</span><br>
+                    <div class="file">│   ├── script.js</div> <span class="js"># Main JavaScript</span><br>
+                    <div class="file">│   ├── results.js</div> <span class="js"># Results JavaScript</span><br>
+                    <div class="file">│   ├── enhanced-charts.js</div> <span class="js"># Chart.js integration</span><br>
+                    <div class="file">│   └── logo.png</div> <span class="python"># Logo image</span><br>
+                    <div class="folder">├── user_data/</div><br>
+                    <div class="file">│   └── user_data.csv</div> <span class="python"># Historical data storage</span><br>
+                    <div class="folder">└── logo/</div><br>
+                    <div class="file">    └── hcmut.png</div> <span class="python"># University logo</span>
                 </div>
             </div>
 
@@ -415,13 +395,18 @@
                 </div>
                 
                 <div class="api-endpoint">
-                    <span class="method">POST</span> <span class="url">/api/balance-test</span>
-                    <p>Đo thời gian thăng bằng đứng 1 chân</p>
+                    <span class="method">POST</span> <span class="url">/api/save-results</span>
+                    <p>Lưu kết quả vào CSV (backup function)</p>
                 </div>
                 
                 <div class="api-endpoint">
                     <span class="method">GET</span> <span class="url">/api/get-history/&lt;name&gt;</span>
                     <p>Lấy lịch sử đo của người dùng</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/clear-session</span>
+                    <p>Xóa dữ liệu session</p>
                 </div>
             </div>
 
@@ -782,6 +767,7 @@
                 <h3>Web Application</h3>
                 <ol>
                     <li><strong>Cài đặt:</strong> <code>pip install -r web_requirements.txt</code></li>
+                    <li><strong>Cấu hình API keys:</strong> Tạo file <code>.env</code> với Google API key (tùy chọn)</li>
                     <li><strong>Chạy:</strong> <code>python app.py</code></li>
                     <li><strong>Truy cập:</strong> <code>http://localhost:5000</code></li>
                     <li><strong>Chọn phương thức:</strong> Nhập thủ công hoặc quét CCCD</li>
@@ -797,12 +783,22 @@
                     <li><strong>Đo cân nặng:</strong> Tự động kết nối và đo từ scale</li>
                     <li><strong>Nhận kết quả:</strong> Xem khuyến nghị và lưu dữ liệu</li>
                 </ol>
+                
+                <div class="highlight">
+                    <h4>📋 Cấu hình API Keys (Tùy chọn)</h4>
+                    <p>Tạo file <code>.env</code> trong thư mục gốc:</p>
+                    <div class="api-endpoint">
+                        <span class="method">ENV</span> <span class="url">GOOGLE_API_KEY=your_google_api_key_here</span><br>
+                        <span class="method">ENV</span> <span class="url">LANGCHAIN_API_KEY=your_langchain_api_key_here</span>
+                    </div>
+                    <p><strong>Lưu ý:</strong> Nếu không có API key, web app vẫn hoạt động nhưng sẽ không có khuyến nghị AI.</p>
+                </div>
             </div>
 
             <!-- Kết luận -->
             <div class="section">
                 <h2>🎯 Kết luận</h2>
-                <p><strong>Hệ thống chăm sóc sức khỏe điện tử</strong> (Xiaomi Smart Scale) là một dự án toàn diện kết hợp nhiều công nghệ hiện đại để tạo ra một hệ thống đo và phân tích sức khỏe thông minh. Dự án không chỉ đơn thuần là một ứng dụng đo cân nặng mà còn là một giải pháp tích hợp AI, IoT, Computer Vision, và web technology để cung cấp trải nghiệm người dùng tốt nhất.</p>
+                <p><strong>Xiaomi Smart Scale</strong> là một dự án toàn diện kết hợp nhiều công nghệ hiện đại để tạo ra một hệ thống đo và phân tích sức khỏe thông minh. Dự án không chỉ đơn thuần là một ứng dụng đo cân nặng mà còn là một giải pháp tích hợp AI, IoT, Computer Vision, và web technology để cung cấp trải nghiệm người dùng tốt nhất.</p>
                 
                 <div class="highlight">
                     <h4>🏆 Thành tựu kỹ thuật nổi bật</h4>

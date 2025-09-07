@@ -4,7 +4,7 @@
 // CONFIGURATION
 // ==============================================================================
 const CONFIG = {
-    SHOW_TEST_BUTTON: true, // Đặt false để ẩn nút Test Demo
+    SHOW_TEST_BUTTON: false, // Đặt false để ẩn nút Test Demo
 };
 
 document.addEventListener('DOMContentLoaded', function() {
