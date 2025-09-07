@@ -88,8 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (resultData) {
         const result = JSON.parse(resultData);
         displayDetailedResults(result);
-        createBodyCompositionChart(result.body_composition);
         initializeTooltips();
+        initializeHistoryButton();
     } else {
         // Nếu không có dữ liệu, chuyển về trang chủ
         window.location.href = '/';
@@ -110,8 +110,19 @@ function displayDetailedResults(result) {
     // Hiển thị thành phần cơ thể
     displayBodyComposition(bodyComp);
     
+    // Hiển thị thời gian thăng bằng nếu có
+    displayBalanceTime(result.balance_time);
+    
     // Hiển thị khuyến nghị AI
     displayAIRecommendations(aiRec);
+    
+    // Khởi tạo tất cả biểu đồ ngay lập tức
+    setTimeout(() => {
+        createBodyCompositionChart(bodyComp);
+        createHealthScoreChart(bodyComp);
+        createStandardsComparisonChart(bodyComp);
+        createHealthRadarChart(bodyComp);
+    }, 100);
 }
 
 function displayUserInfo(userInfo) {
@@ -262,6 +273,18 @@ function displayBodyComposition(bodyComp) {
     bodyCompositionDiv.innerHTML = html;
 }
 
+function displayBalanceTime(balanceTime) {
+    const balanceTimeSection = document.getElementById('balanceTimeSection');
+    const balanceTimeValue = document.getElementById('balanceTimeValue');
+    
+    if (balanceTime && balanceTime > 0) {
+        balanceTimeValue.textContent = balanceTime.toFixed(1);
+        balanceTimeSection.style.display = 'block';
+    } else {
+        balanceTimeSection.style.display = 'none';
+    }
+}
+
 function displayAIRecommendations(aiRec) {
     const aiDiv = document.getElementById('aiRecommendations');
     
@@ -271,6 +294,7 @@ function displayAIRecommendations(aiRec) {
         aiDiv.innerHTML = '<p class="text-muted">Không có khuyến nghị AI</p>';
     }
 }
+
 
 function createBodyCompositionChart(bodyComp) {
     const ctx = document.getElementById('bodyCompositionChart').getContext('2d');
@@ -613,4 +637,477 @@ function updateTooltipPosition(tooltip, targetMetric) {
     // Cập nhật vị trí tooltip
     tooltip.style.left = left + 'px';
     tooltip.style.top = top + 'px';
+}
+
+// ==============================================================================
+// HISTORY FUNCTIONS
+// ==============================================================================
+
+function initializeHistoryButton() {
+    // Button xem lịch sử
+    const viewHistoryBtn = document.getElementById('viewHistoryBtn');
+    const refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
+    
+    if (viewHistoryBtn) {
+        viewHistoryBtn.addEventListener('click', viewHistory);
+    }
+    
+    if (refreshHistoryBtn) {
+        refreshHistoryBtn.addEventListener('click', refreshHistory);
+    }
+}
+
+function viewHistory() {
+    // Lấy tên người dùng từ kết quả hiện tại
+    const resultData = sessionStorage.getItem('calculationResult');
+    if (!resultData) {
+        showNotification('Không có dữ liệu để xem lịch sử', 'warning');
+        return;
+    }
+    
+    const result = JSON.parse(resultData);
+    const userName = result.user_info.name;
+    
+    if (!userName) {
+        showNotification('Không tìm thấy tên người dùng', 'error');
+        return;
+    }
+    
+    // Hiển thị modal lịch sử
+    const historyModal = new bootstrap.Modal(document.getElementById('historyModal'));
+    historyModal.show();
+    
+    // Load lịch sử
+    loadUserHistory(userName);
+}
+
+function loadUserHistory(userName) {
+    const historyContent = document.getElementById('historyContent');
+    
+    // Hiển thị loading
+    historyContent.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-info" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <p class="mt-2">Đang tải lịch sử đo của ${userName}...</p>
+        </div>
+    `;
+    
+    // Gọi API lấy lịch sử
+    fetch(`/api/get-history/${encodeURIComponent(userName)}`)
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                displayHistory(result.data, userName);
+            } else {
+                historyContent.innerHTML = `
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${result.message}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading history:', error);
+            historyContent.innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Lỗi khi tải lịch sử: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function displayHistory(historyData, userName) {
+    const historyContent = document.getElementById('historyContent');
+    
+    if (!historyData || historyData.length === 0) {
+        historyContent.innerHTML = `
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                Chưa có lịch sử đo cho ${userName}
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="mb-3">
+            <h6 class="text-primary">
+                <i class="fas fa-user me-2"></i>Lịch sử đo của: ${userName}
+            </h6>
+            <p class="text-muted">Tổng cộng: ${historyData.length} lần đo</p>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Cân nặng (kg)</th>
+                        <th>BMI</th>
+                        <th>BMR</th>
+                        <th>Tỷ lệ mỡ (%)</th>
+                        <th>Tỷ lệ nước (%)</th>
+                        <th>Khối lượng cơ (kg)</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    historyData.forEach((record, index) => {
+        const datetime = record.datetime || 'N/A';
+        const weight = record.weight || 'N/A';
+        const bmi = record.bmi || 'N/A';
+        const bmr = record.bmr || 'N/A';
+        const fatPct = record.fat_percentage || 'N/A';
+        const waterPct = record.water_percentage || 'N/A';
+        const muscle = record.muscle_mass || 'N/A';
+        
+        html += `
+            <tr>
+                <td>${datetime}</td>
+                <td>${weight}</td>
+                <td>${bmi}</td>
+                <td>${bmr}</td>
+                <td>${fatPct}</td>
+                <td>${waterPct}</td>
+                <td>${muscle}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    historyContent.innerHTML = html;
+}
+
+function refreshHistory() {
+    // Lấy tên người dùng từ kết quả hiện tại
+    const resultData = sessionStorage.getItem('calculationResult');
+    if (resultData) {
+        const result = JSON.parse(resultData);
+        const userName = result.user_info.name;
+        if (userName) {
+            loadUserHistory(userName);
+        }
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Tạo toast notification
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
+    
+    const toast = document.createElement('div');
+    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-${getIconForType(type)} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    // Xóa toast sau khi ẩn
+    toast.addEventListener('hidden.bs.toast', () => {
+        toast.remove();
+    });
+}
+
+function getIconForType(type) {
+    const icons = {
+        'success': 'check-circle',
+        'error': 'exclamation-circle',
+        'warning': 'exclamation-triangle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+    return container;
+}
+
+// ==============================================================================
+// NEW CHART FUNCTIONS
+// ==============================================================================
+
+// Tính điểm sức khỏe cho từng chỉ số (0-100)
+function calculateHealthScore(bodyComp) {
+    const scores = {};
+    
+    // BMI Score (0-100)
+    if (bodyComp.bmi < 18.5) {
+        scores.bmi = Math.max(0, 100 - (18.5 - bodyComp.bmi) * 10);
+    } else if (bodyComp.bmi <= 24.9) {
+        scores.bmi = 100;
+    } else if (bodyComp.bmi <= 29.9) {
+        scores.bmi = Math.max(0, 100 - (bodyComp.bmi - 24.9) * 8);
+    } else {
+        scores.bmi = Math.max(0, 100 - (bodyComp.bmi - 29.9) * 5);
+    }
+    
+    // BMR Score (0-100)
+    const avgBMR = bodyComp.gender === 'male' ? 1800 : 1400;
+    const bmrRatio = bodyComp.bmr / avgBMR;
+    if (bmrRatio >= 0.9 && bmrRatio <= 1.1) {
+        scores.bmr = 100;
+    } else if (bmrRatio >= 0.8 && bmrRatio <= 1.2) {
+        scores.bmr = 80;
+    } else {
+        scores.bmr = Math.max(0, 100 - Math.abs(bmrRatio - 1) * 50);
+    }
+    
+    // Fat Percentage Score (0-100)
+    const fatStatus = getFatPercentageStatus(bodyComp.fp, bodyComp.gender, bodyComp.age);
+    if (fatStatus.class === 'status-excellent') {
+        scores.fat = 100;
+    } else if (fatStatus.class === 'status-warning') {
+        scores.fat = 60;
+    } else {
+        scores.fat = 30;
+    }
+    
+    // Water Percentage Score (0-100)
+    const waterStatus = getWaterPercentageStatus(bodyComp.wp, bodyComp.gender, bodyComp.age);
+    if (waterStatus.class === 'status-excellent') {
+        scores.water = 100;
+    } else {
+        scores.water = 60;
+    }
+    
+    // Muscle Mass Score (0-100)
+    const muscleStatus = getMuscleMassStatus(bodyComp.ms, bodyComp.gender, bodyComp.age);
+    if (muscleStatus.class === 'status-excellent') {
+        scores.muscle = 100;
+    } else if (muscleStatus.class === 'status-warning') {
+        scores.muscle = 60;
+    } else {
+        scores.muscle = 30;
+    }
+    
+    // Visceral Fat Score (0-100)
+    if (bodyComp.vf <= 9) {
+        scores.visceral = 100;
+    } else if (bodyComp.vf <= 15) {
+        scores.visceral = 70;
+    } else {
+        scores.visceral = Math.max(0, 100 - (bodyComp.vf - 15) * 5);
+    }
+    
+    return scores;
+}
+
+// Tạo biểu đồ điểm sức khỏe
+function createHealthScoreChart(bodyComp) {
+    const ctx = document.getElementById('healthScoreChart').getContext('2d');
+    const scores = calculateHealthScore(bodyComp);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['BMI', 'BMR', 'Tỷ lệ mỡ', 'Tỷ lệ nước', 'Khối lượng cơ', 'Mỡ nội tạng'],
+            datasets: [{
+                label: 'Điểm sức khỏe',
+                data: [scores.bmi, scores.bmr, scores.fat, scores.water, scores.muscle, scores.visceral],
+                backgroundColor: [
+                    scores.bmi >= 80 ? '#28a745' : scores.bmi >= 60 ? '#ffc107' : '#dc3545',
+                    scores.bmr >= 80 ? '#28a745' : scores.bmr >= 60 ? '#ffc107' : '#dc3545',
+                    scores.fat >= 80 ? '#28a745' : scores.fat >= 60 ? '#ffc107' : '#dc3545',
+                    scores.water >= 80 ? '#28a745' : scores.water >= 60 ? '#ffc107' : '#dc3545',
+                    scores.muscle >= 80 ? '#28a745' : scores.muscle >= 60 ? '#ffc107' : '#dc3545',
+                    scores.visceral >= 80 ? '#28a745' : scores.visceral >= 60 ? '#ffc107' : '#dc3545'
+                ],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed.y.toFixed(0) + '/100 điểm';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '/100';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Tạo biểu đồ so sánh với tiêu chuẩn
+function createStandardsComparisonChart(bodyComp) {
+    const ctx = document.getElementById('standardsComparisonChart').getContext('2d');
+    
+    // Định nghĩa tiêu chuẩn
+    const standards = {
+        bmi: { min: 18.5, max: 24.9, current: bodyComp.bmi },
+        fat: { 
+            min: bodyComp.gender === 'male' ? 6 : 16, 
+            max: bodyComp.gender === 'male' ? 19 : 26, 
+            current: bodyComp.fp 
+        },
+        water: { 
+            min: bodyComp.gender === 'male' ? 55 : 50, 
+            max: bodyComp.gender === 'male' ? 65 : 60, 
+            current: bodyComp.wp 
+        },
+        muscle: { 
+            min: bodyComp.gender === 'male' ? 30 : 20, 
+            max: bodyComp.gender === 'male' ? 50 : 40, 
+            current: bodyComp.ms 
+        }
+    };
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['BMI', 'Tỷ lệ mỡ (%)', 'Tỷ lệ nước (%)', 'Khối lượng cơ (kg)'],
+            datasets: [
+                {
+                    label: 'Tiêu chuẩn tối thiểu',
+                    data: [standards.bmi.min, standards.fat.min, standards.water.min, standards.muscle.min],
+                    backgroundColor: '#ffc107',
+                    borderColor: '#ff8c00',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Tiêu chuẩn tối đa',
+                    data: [standards.bmi.max, standards.fat.max, standards.water.max, standards.muscle.max],
+                    backgroundColor: '#28a745',
+                    borderColor: '#1e7e34',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Giá trị hiện tại',
+                    data: [standards.bmi.current, standards.fat.current, standards.water.current, standards.muscle.current],
+                    backgroundColor: '#007bff',
+                    borderColor: '#0056b3',
+                    borderWidth: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.dataset.label;
+                            const value = context.parsed.y;
+                            const unit = context.label.includes('BMI') ? '' : 
+                                       context.label.includes('mỡ') || context.label.includes('nước') ? '%' : 'kg';
+                            return label + ': ' + value.toFixed(1) + unit;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Tạo biểu đồ radar tổng quan sức khỏe
+function createHealthRadarChart(bodyComp) {
+    const ctx = document.getElementById('healthRadarChart').getContext('2d');
+    const scores = calculateHealthScore(bodyComp);
+    
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['BMI', 'BMR', 'Tỷ lệ mỡ', 'Tỷ lệ nước', 'Khối lượng cơ', 'Mỡ nội tạng'],
+            datasets: [{
+                label: 'Điểm sức khỏe hiện tại',
+                data: [scores.bmi, scores.bmr, scores.fat, scores.water, scores.muscle, scores.visceral],
+                backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                borderColor: 'rgba(0, 123, 255, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(0, 123, 255, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(0, 123, 255, 1)'
+            }, {
+                label: 'Mục tiêu lý tưởng',
+                data: [100, 100, 100, 100, 100, 100],
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1,
+                pointBackgroundColor: 'rgba(40, 167, 69, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(40, 167, 69, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.parsed.r.toFixed(0) + '/100 điểm';
+                        }
+                    }
+                }
+            },
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20,
+                        callback: function(value) {
+                            return value + '/100';
+                        }
+                    }
+                }
+            }
+        }
+    });
 }

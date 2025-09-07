@@ -318,9 +318,6 @@ async function calculateMetrics() {
             // Lưu kết quả vào sessionStorage để hiển thị ở trang results
             sessionStorage.setItem('calculationResult', JSON.stringify(result));
             
-            // Hiển thị kết quả trong modal
-            displayResults(result);
-            
             // Hiển thị thông báo lưu CSV
             if (result.csv_saved) {
                 showNotification('✓ Đã lưu kết quả vào file CSV thành công!', 'success');
@@ -328,9 +325,8 @@ async function calculateMetrics() {
                 showNotification('⚠️ Lưu kết quả vào CSV thất bại', 'warning');
             }
             
-            // Hiển thị modal kết quả
-            const resultsModal = new bootstrap.Modal(document.getElementById('resultsModal'));
-            resultsModal.show();
+            // Chuyển thẳng đến trang kết quả chi tiết
+            window.location.href = '/results';
             
         } else {
             showNotification(result.message, 'error');

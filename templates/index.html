@@ -8,32 +8,51 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
 </head>
-<body>
+<body class="homepage">
     <div class="container-fluid">
-        <!-- Main Content -->
-        <div class="container mt-5">
-            <!-- Main Title -->
-            <div class="row justify-content-center mb-5">
-                <div class="col-12 text-center">
-                    <div class="logo-container mb-4 fade-in" style="margin-top: 2rem;">
-                        <img src="{{ url_for('static', filename='logo.png') }}" alt="HCMUT Logo" class="logo-img">
+        <!-- Header Section -->
+        <div class="homepage-header">
+            <div class="container">
+                <div class="row align-items-center py-4">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            <img src="{{ url_for('static', filename='logo.png') }}" alt="HCMUT Logo" class="header-logo me-3">
+                            <div>
+                                <h1 class="header-title mb-1">Hệ thống chăm sóc sức khoẻ điện tử</h1>
+                                <p class="header-subtitle mb-0">Phân tích thành phần cơ thể và đánh giá sức khỏe toàn diện</p>
+                            </div>
+                        </div>
                     </div>
-                    <h1 class="display-4 fw-bold text-primary mb-5 fade-in" style="animation-delay: 0.1s;">
-                        🏥 Hệ thống chăm sóc sức khoẻ điện tử 💊
-                    </h1>
-                    <p class="lead text-muted fade-in" style="animation-delay: 0.2s;">Phân tích thành phần cơ thể và đánh giá sức khỏe toàn diện</p>
+                    <div class="col-md-4 text-end">
+                        <div class="header-actions">
+                            <span class="header-badge">
+                                <i class="fas fa-heartbeat me-1"></i>
+                                Sức khỏe thông minh
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container py-4">
+            <!-- Main Form Card -->
             <div class="row justify-content-center">
                 <div class="col-12">
-                    <div class="card shadow-lg scale-in" style="animation-delay: 0.4s;">
-                        <div class="card-header bg-primary text-white">
-                            <h4 class="mb-0">
-                                <i class="fas fa-user-plus me-2"></i>
-                                Nhập thông tin cá nhân
-                            </h4>
+                    <div class="homepage-main-card">
+                        <div class="main-card-header">
+                            <div class="d-flex align-items-center">
+                                <div class="main-card-icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="ms-3">
+                                    <h2 class="main-card-title mb-1">Nhập thông tin cá nhân</h2>
+                                    <p class="main-card-subtitle mb-0">Điền thông tin để bắt đầu phân tích sức khỏe</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body p-4">
+                        <div class="main-card-content">
                             <!-- Form thống nhất -->
                             <form id="personalInfoForm">
                                 <!-- QR Scanner Section -->
@@ -212,32 +231,35 @@
                                 </div>
                             </form>
                         </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row justify-content-center" style="margin-bottom: 3rem;">
-                <div class="col-12">
-                    <!-- Buttons -->
-                    <div class="d-flex justify-content-between mt-4 mb-5">
-                                <button type="button" class="btn btn-outline-secondary" id="clearBtn">
-                                    <i class="fas fa-eraser me-2"></i>Xóa dữ liệu
+                        
+                        <!-- Action Buttons -->
+                        <div class="main-card-actions">
+                            <div class="actions-container">
+                                <button type="button" class="action-btn secondary" id="clearBtn">
+                                    <i class="fas fa-eraser"></i>
+                                    <span>Xóa dữ liệu</span>
                                 </button>
-                                <button type="button" class="btn btn-outline-info" id="testBtn">
-                                    <i class="fas fa-flask me-2"></i>Test Demo
+                                <button type="button" class="action-btn outline" id="testBtn">
+                                    <i class="fas fa-flask"></i>
+                                    <span>Test Demo</span>
                                 </button>
-                                <button type="button" class="btn btn-primary btn-lg" id="nextStepBtn">
-                                    <i class="fas fa-arrow-right me-2"></i>Bước tiếp theo
+                                <button type="button" class="action-btn primary" id="nextStepBtn">
+                                    <i class="fas fa-arrow-right"></i>
+                                    <span>Bước tiếp theo</span>
                                 </button>
-                                <button type="button" class="btn btn-warning btn-lg" id="remeasureBtn" style="display: none;">
-                                    <i class="fas fa-redo me-2"></i>Đo lại
+                                <button type="button" class="action-btn warning" id="remeasureBtn" style="display: none;">
+                                    <i class="fas fa-redo"></i>
+                                    <span>Đo lại</span>
                                 </button>
-                                <button type="button" class="btn btn-success btn-lg" id="calculateBtn" style="display: none;">
-                                    <i class="fas fa-calculator me-2"></i>Tính toán
+                                <button type="button" class="action-btn success" id="calculateBtn" style="display: none;">
+                                    <i class="fas fa-calculator"></i>
+                                    <span>Tính toán</span>
                                 </button>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
 
                     <!-- Loading Modal -->
                     <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
@@ -283,65 +305,70 @@
                     <!-- Weight Measurement Modal -->
                     <div class="modal fade" id="weightModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
                         <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header bg-warning text-dark">
-                                    <h5 class="modal-title">
-                                        <i class="fas fa-weight-hanging me-2"></i>Đo cân nặng
-                                    </h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" id="closeWeightModal"></button>
+                            <div class="modal-content modern-modal">
+                                <div class="modal-header modern-modal-header warning">
+                                    <div class="modal-header-content">
+                                        <div class="modal-icon">
+                                            <i class="fas fa-weight-hanging"></i>
+                                        </div>
+                                        <div class="modal-title-content">
+                                            <h5 class="modal-title">Đo cân nặng</h5>
+                                            <p class="modal-subtitle">Kết nối với cân Bluetooth để đo cân nặng</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="closeWeightModal"></button>
                                 </div>
-                                <div class="modal-body text-center">
-                                    <div id="weightMeasurementStatus">
-                                        <div class="mb-4">
-                                            <i class="fas fa-weight-hanging text-warning" style="font-size: 4rem;"></i>
+                                <div class="modal-body modern-modal-body">
+                                    <div id="weightMeasurementStatus" class="modal-content-section">
+                                        <div class="modal-icon-large warning">
+                                            <i class="fas fa-weight-hanging"></i>
                                         </div>
-                                        <h4 class="mb-3">Đo cân nặng từ Bluetooth</h4>
-                                        <p class="text-muted mb-4">Vui lòng đứng lên cân Bluetooth để đo cân nặng</p>
-                                        <button type="button" class="btn btn-warning btn-lg" id="startWeightBtn">
-                                            <i class="fas fa-play me-2"></i>Bắt đầu đo cân
+                                        <h4 class="modal-section-title">Đo cân nặng từ Bluetooth</h4>
+                                        <p class="modal-section-description">Vui lòng đứng lên cân Bluetooth để đo cân nặng</p>
+                                        <button type="button" class="action-btn warning" id="startWeightBtn">
+                                            <i class="fas fa-play"></i>
+                                            <span>Bắt đầu đo cân</span>
                                         </button>
                                     </div>
                                     
-                                    <div id="weightSearching" style="display: none;">
-                                        <div class="mb-4">
-                                            <div class="spinner-border text-warning" style="width: 4rem; height: 4rem;" role="status">
-                                                <span class="visually-hidden">Đang tìm kiếm...</span>
-                                            </div>
+                                    <div id="weightSearching" style="display: none;" class="modal-content-section">
+                                        <div class="modal-loading">
+                                            <div class="modal-spinner warning"></div>
                                         </div>
-                                        <h4 class="mb-3">Đang tìm kiếm cân Bluetooth...</h4>
-                                        <p class="text-muted mb-4">Vui lòng đứng lên cân và chờ đợi</p>
-                                        <div class="progress mb-3" style="height: 8px;">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
-                                                 role="progressbar" style="width: 100%"></div>
-                                        </div>
-                                        <button type="button" class="btn btn-outline-secondary" id="cancelWeightBtn">
-                                            <i class="fas fa-times me-2"></i>Hủy
+                                        <h4 class="modal-section-title">Đang tìm kiếm cân Bluetooth...</h4>
+                                        <p class="modal-section-description">Vui lòng đứng lên cân và chờ đợi</p>
+                                        <button type="button" class="action-btn outline" id="cancelWeightBtn">
+                                            <i class="fas fa-times"></i>
+                                            <span>Hủy</span>
                                         </button>
                                     </div>
                                     
-                                    <div id="weightDisplay" style="display: none;">
-                                        <div class="mb-4">
-                                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                                    <div id="weightDisplay" style="display: none;" class="modal-content-section">
+                                        <div class="modal-icon-large success">
+                                            <i class="fas fa-check-circle"></i>
                                         </div>
-                                        <h2 class="text-primary mb-3">
-                                            <i class="fas fa-weight-hanging me-2"></i>
+                                        <div class="modal-result-value">
+                                            <i class="fas fa-weight-hanging"></i>
                                             <span id="currentWeightValue">0</span> kg
-                                        </h2>
-                                        <p class="text-muted mb-4">Cân nặng đã được đo thành công!</p>
+                                        </div>
+                                        <p class="modal-section-description">Cân nặng đã được đo thành công!</p>
                                         
-                                        <div class="d-flex justify-content-center gap-3 mt-4">
-                                            <button type="button" class="btn btn-success btn-lg" id="confirmWeightBtn">
-                                                <i class="fas fa-check me-2"></i>Xác nhận
+                                        <div class="modal-actions">
+                                            <button type="button" class="action-btn success" id="confirmWeightBtn">
+                                                <i class="fas fa-check"></i>
+                                                <span>Xác nhận</span>
                                             </button>
-                                            <button type="button" class="btn btn-outline-secondary" id="retryWeightBtn">
-                                                <i class="fas fa-redo me-2"></i>Đo lại
+                                            <button type="button" class="action-btn outline" id="retryWeightBtn">
+                                                <i class="fas fa-redo"></i>
+                                                <span>Đo lại</span>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeWeightModalFooter">
-                                        <i class="fas fa-times me-2"></i>Đóng
+                                <div class="modal-footer modern-modal-footer">
+                                    <button type="button" class="action-btn secondary" data-bs-dismiss="modal" id="closeWeightModalFooter">
+                                        <i class="fas fa-times"></i>
+                                        <span>Đóng</span>
                                     </button>
                                 </div>
                             </div>
@@ -351,26 +378,36 @@
                     <!-- Balance Choice Modal -->
                     <div class="modal fade" id="balanceChoiceModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
                         <div class="modal-dialog modal-md">
-                            <div class="modal-content">
-                                <div class="modal-header bg-info text-white">
-                                    <h5 class="modal-title">
-                                        <i class="fas fa-balance-scale me-2"></i>Kiểm tra thăng bằng
-                                    </h5>
-                                </div>
-                                <div class="modal-body text-center">
-                                    <div class="mb-4">
-                                        <i class="fas fa-balance-scale text-info" style="font-size: 4rem;"></i>
+                            <div class="modal-content modern-modal">
+                                <div class="modal-header modern-modal-header info">
+                                    <div class="modal-header-content">
+                                        <div class="modal-icon">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <div class="modal-title-content">
+                                            <h5 class="modal-title">Kiểm tra thăng bằng</h5>
+                                            <p class="modal-subtitle">Đánh giá khả năng thăng bằng của bạn</p>
+                                        </div>
                                     </div>
-                                    <h4 class="mb-3">Bạn có muốn đo thời gian thăng bằng không?</h4>
-                                    <p class="text-muted mb-4">Đo thời gian đứng 1 chân để đánh giá khả năng thăng bằng của bạn</p>
-                                    
-                                    <div class="d-flex justify-content-center gap-3">
-                                        <button type="button" class="btn btn-info btn-lg" id="yesBalanceBtn">
-                                            <i class="fas fa-check me-2"></i>Có, đo thăng bằng
-                                        </button>
-                                        <button type="button" class="btn btn-outline-secondary btn-lg" id="noBalanceBtn">
-                                            <i class="fas fa-times me-2"></i>Bỏ qua
-                                        </button>
+                                </div>
+                                <div class="modal-body modern-modal-body">
+                                    <div class="modal-content-section">
+                                        <div class="modal-icon-large info">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <h4 class="modal-section-title">Bạn có muốn đo thời gian thăng bằng không?</h4>
+                                        <p class="modal-section-description">Đo thời gian đứng 1 chân để đánh giá khả năng thăng bằng của bạn</p>
+                                        
+                                        <div class="modal-actions">
+                                            <button type="button" class="action-btn secondary" id="yesBalanceBtn">
+                                                <i class="fas fa-check"></i>
+                                                <span>Có, đo thăng bằng</span>
+                                            </button>
+                                            <button type="button" class="action-btn outline" id="noBalanceBtn">
+                                                <i class="fas fa-times"></i>
+                                                <span>Bỏ qua</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -380,65 +417,70 @@
                     <!-- Balance Test Modal -->
                     <div class="modal fade" id="balanceModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
                         <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header bg-info text-white">
-                                    <h5 class="modal-title">
-                                        <i class="fas fa-balance-scale me-2"></i>Đo thời gian thăng bằng
-                                    </h5>
+                            <div class="modal-content modern-modal">
+                                <div class="modal-header modern-modal-header info">
+                                    <div class="modal-header-content">
+                                        <div class="modal-icon">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <div class="modal-title-content">
+                                            <h5 class="modal-title">Đo thời gian thăng bằng</h5>
+                                            <p class="modal-subtitle">Đánh giá khả năng thăng bằng của bạn</p>
+                                        </div>
+                                    </div>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" id="closeBalanceModal"></button>
                                 </div>
-                                <div class="modal-body text-center">
-                                    <div id="balanceTestStatus">
-                                        <div class="mb-4">
-                                            <i class="fas fa-balance-scale text-info" style="font-size: 4rem;"></i>
+                                <div class="modal-body modern-modal-body">
+                                    <div id="balanceTestStatus" class="modal-content-section">
+                                        <div class="modal-icon-large info">
+                                            <i class="fas fa-balance-scale"></i>
                                         </div>
-                                        <h4 class="mb-3">Đo thời gian thăng bằng đứng 1 chân</h4>
-                                        <p class="text-muted mb-4">Vui lòng đứng 1 chân và giữ thăng bằng càng lâu càng tốt</p>
-                                        <button type="button" class="btn btn-info btn-lg" id="startBalanceBtn">
-                                            <i class="fas fa-play me-2"></i>Bắt đầu đo thăng bằng
+                                        <h4 class="modal-section-title">Đo thời gian thăng bằng đứng 1 chân</h4>
+                                        <p class="modal-section-description">Vui lòng đứng 1 chân và giữ thăng bằng càng lâu càng tốt</p>
+                                        <button type="button" class="action-btn secondary" id="startBalanceBtn">
+                                            <i class="fas fa-play"></i>
+                                            <span>Bắt đầu đo thăng bằng</span>
                                         </button>
                                     </div>
                                     
-                                    <div id="balanceTestRunning" style="display: none;">
-                                        <div class="mb-4">
-                                            <div class="spinner-border text-info" style="width: 4rem; height: 4rem;" role="status">
-                                                <span class="visually-hidden">Đang đo...</span>
-                                            </div>
+                                    <div id="balanceTestRunning" style="display: none;" class="modal-content-section">
+                                        <div class="modal-loading">
+                                            <div class="modal-spinner info"></div>
                                         </div>
-                                        <h4 class="mb-3">Đang đo thời gian thăng bằng...</h4>
-                                        <p class="text-muted mb-4">Hãy đứng 1 chân và giữ thăng bằng</p>
-                                        <div class="progress mb-3" style="height: 8px;">
-                                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
-                                                 role="progressbar" style="width: 100%"></div>
-                                        </div>
-                                        <button type="button" class="btn btn-outline-secondary" id="cancelBalanceBtn">
-                                            <i class="fas fa-times me-2"></i>Hủy
+                                        <h4 class="modal-section-title">Đang đo thời gian thăng bằng...</h4>
+                                        <p class="modal-section-description">Hãy đứng 1 chân và giữ thăng bằng</p>
+                                        <button type="button" class="action-btn outline" id="cancelBalanceBtn">
+                                            <i class="fas fa-times"></i>
+                                            <span>Hủy</span>
                                         </button>
                                     </div>
                                     
-                                    <div id="balanceTestResult" style="display: none;">
-                                        <div class="mb-4">
-                                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                                    <div id="balanceTestResult" style="display: none;" class="modal-content-section">
+                                        <div class="modal-icon-large success">
+                                            <i class="fas fa-check-circle"></i>
                                         </div>
-                                        <h2 class="text-primary mb-3">
-                                            <i class="fas fa-clock me-2"></i>
+                                        <div class="modal-result-value">
+                                            <i class="fas fa-clock"></i>
                                             <span id="balanceTime">0</span> giây
-                                        </h2>
-                                        <p class="text-muted mb-4">Thời gian thăng bằng đã được đo thành công!</p>
+                                        </div>
+                                        <p class="modal-section-description">Thời gian thăng bằng đã được đo thành công!</p>
                                         
-                                        <div class="d-flex justify-content-center gap-3">
-                                            <button type="button" class="btn btn-success btn-lg" id="confirmBalanceBtn">
-                                                <i class="fas fa-check me-2"></i>Xác nhận
+                                        <div class="modal-actions">
+                                            <button type="button" class="action-btn success" id="confirmBalanceBtn">
+                                                <i class="fas fa-check"></i>
+                                                <span>Xác nhận</span>
                                             </button>
-                                            <button type="button" class="btn btn-outline-primary" id="retryBalanceBtn">
-                                                <i class="fas fa-redo me-2"></i>Đo lại
+                                            <button type="button" class="action-btn outline" id="retryBalanceBtn">
+                                                <i class="fas fa-redo"></i>
+                                                <span>Đo lại</span>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeBalanceModalFooter">
-                                        <i class="fas fa-times me-2"></i>Đóng
+                                <div class="modal-footer modern-modal-footer">
+                                    <button type="button" class="action-btn secondary" data-bs-dismiss="modal" id="closeBalanceModalFooter">
+                                        <i class="fas fa-times"></i>
+                                        <span>Đóng</span>
                                     </button>
                                 </div>
                             </div>
