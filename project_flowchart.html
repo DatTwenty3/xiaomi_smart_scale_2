@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống chăm sóc sức khỏe điện tử - Biểu đồ Flow Chart Dự án</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .section {
+            margin-bottom: 50px;
+        }
+        
+        .section h2 {
+            color: #1976d2;
+            border-bottom: 3px solid #1976d2;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+        
+        .section h3 {
+            color: #1565c0;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .flowchart-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .mermaid {
+            text-align: center;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #1976d2;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .feature-card h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .tech-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .api-endpoint {
+            background: #f5f5f5;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .api-endpoint .method {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .api-endpoint .url {
+            color: #1976d2;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .highlight h4 {
+            color: #856404;
+            margin: 0 0 10px 0;
+        }
+        
+        .workflow-step {
+            background: #e8f5e8;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+        }
+        
+        .workflow-step h4 {
+            color: #2e7d32;
+            margin: 0 0 8px 0;
+        }
+        
+        .file-structure {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            border: 1px solid #e9ecef;
+        }
+        
+        .file-structure .folder {
+            color: #1976d2;
+            font-weight: bold;
+        }
+        
+        .file-structure .file {
+            color: #666;
+        }
+        
+        .file-structure .python {
+            color: #4caf50;
+        }
+        
+        .file-structure .html {
+            color: #ff9800;
+        }
+        
+        .file-structure .css {
+            color: #2196f3;
+        }
+        
+        .file-structure .js {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Hệ thống chăm sóc sức khỏe điện tử</h1>
+            <p>Hệ thống đo và phân tích thành phần cơ thể thông minh với AI và IoT</p>
+        </div>
+        
+        <div class="content">
+            <!-- Tổng quan dự án -->
+            <div class="section">
+                <h2>📋 Tổng quan dự án</h2>
+                <p><strong>Hệ thống chăm sóc sức khỏe điện tử</strong> (Xiaomi Smart Scale) là một hệ thống đo và phân tích thành phần cơ thể toàn diện, tích hợp công nghệ Bluetooth, AI và web application. Dự án cho phép người dùng đo cân nặng tự động từ cân thông minh, quét thông tin từ CCCD, và nhận khuyến nghị sức khỏe từ AI.</p>
+                
+                <div class="highlight">
+                    <h4>🎯 Mục tiêu chính</h4>
+                    <p>Tạo ra một hệ thống chăm sóc sức khỏe điện tử toàn diện, kết hợp hardware (cân thông minh), software (AI/ML), và web technology để cung cấp giải pháp theo dõi sức khỏe cá nhân hóa và chính xác.</p>
+                </div>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔗 Kết nối Bluetooth</h4>
+                        <p>Hỗ trợ cân Crenot Gofit S2 và Mi Scale 2, đo cân nặng tự động qua Bluetooth</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📱 Quét CCCD QR</h4>
+                        <p>Tích hợp camera để quét mã QR trên CCCD, tự động trích xuất thông tin cá nhân</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🧮 Tính toán chỉ số</h4>
+                        <p>Tính toán 11+ chỉ số sức khỏe: BMI, BMR, TDEE, tỷ lệ mỡ, nước, cơ, xương...</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🤖 AI Khuyến nghị</h4>
+                        <p>Sử dụng Google Gemini AI để đưa ra khuyến nghị sức khỏe cá nhân hóa</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🌐 Web Application</h4>
+                        <p>Giao diện web hiện đại với Bootstrap 5, responsive design, Material Design</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💾 Lưu trữ dữ liệu</h4>
+                        <p>Tự động lưu kết quả vào CSV, xem lịch sử đo, tích hợp MQTT</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biểu đồ flow chart chính -->
+            <div class="section">
+                <h2>🔄 Biểu đồ Flow Chart - Quy trình hoạt động</h2>
+                <div class="flowchart-container">
+                    <div class="mermaid">
+                        graph TD
+                            A[👤 Người dùng truy cập Web App] --> B{Chọn phương thức nhập thông tin}
+                            
+                            B -->|Nhập thủ công| C[📝 Nhập thông tin cá nhân<br/>- Họ tên, ngày sinh, giới tính<br/>- Chiều cao, hệ số hoạt động]
+                            B -->|Quét CCCD| D[📱 Quét mã QR CCCD<br/>- Mở camera<br/>- Trích xuất thông tin tự động]
+                            
+                            C --> E[⚖️ Đo cân nặng từ Bluetooth Scale]
+                            D --> E
+                            
+                            E --> F[🔍 Tìm kiếm thiết bị Bluetooth<br/>- Crenot Gofit S2<br/>- Mi Scale 2]
+                            F --> G[📡 Kết nối và nhận dữ liệu cân nặng]
+                            G --> H[✅ Xác nhận cân nặng]
+                            
+                            H --> I[🧮 Tính toán các chỉ số cơ thể<br/>- BMI, BMR, TDEE<br/>- Tỷ lệ mỡ, nước, cơ<br/>- Khối lượng xương, protein<br/>- Mỡ nội tạng, cân nặng lý tưởng]
+                            
+                            I --> J[🤖 AI Phân tích và đưa ra khuyến nghị<br/>- Google Gemini AI<br/>- Khuyến nghị sức khỏe cá nhân hóa]
+                            
+                            J --> K[💾 Lưu trữ dữ liệu<br/>- CSV file<br/>- MQTT broker]
+                            
+                            K --> L[📊 Hiển thị kết quả<br/>- Modal popup<br/>- Trang chi tiết<br/>- Biểu đồ trực quan]
+                            
+                            L --> M[🔄 Có thể đo lại hoặc xem lịch sử]
+                            
+                            style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+                            style B fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+                            style C fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+                            style D fill:#f3e5f5,stroke:#9c27b0,stroke-width:2px
+                            style E fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+                            style I fill:#e1f5fe,stroke:#00bcd4,stroke-width:2px
+                            style J fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+                            style K fill:#f1f8e9,stroke:#8bc34a,stroke-width:2px
+                            style L fill:#e0f2f1,stroke:#009688,stroke-width:2px
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chi tiết các bước hoạt động -->
+            <div class="section">
+                <h2>🔍 Chi tiết các bước hoạt động</h2>
+                
+                <div class="workflow-step">
+                    <h4>1. Khởi tạo và Nhập thông tin</h4>
+                    <p><strong>Nhập thủ công:</strong> Người dùng điền form với thông tin cá nhân, chiều cao, hệ số hoạt động</p>
+                    <p><strong>Quét CCCD:</strong> Sử dụng camera để quét mã QR, tự động trích xuất họ tên, ngày sinh, giới tính, số CCCD, địa chỉ</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>2. Kết nối Bluetooth Scale</h4>
+                    <p><strong>Tìm kiếm thiết bị:</strong> Quét các thiết bị Bluetooth xung quanh, tìm cân Crenot Gofit S2 hoặc Mi Scale 2</p>
+                    <p><strong>Kết nối:</strong> Thiết lập kết nối BLE (Bluetooth Low Energy) với UUID đặc biệt cho đo thành phần cơ thể</p>
+                    <p><strong>Nhận dữ liệu:</strong> Lắng nghe notification từ scale, parse dữ liệu raw thành cân nặng</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>3. Tính toán chỉ số cơ thể</h4>
+                    <p><strong>BMI:</strong> Body Mass Index = weight(kg) / height(m)²</p>
+                    <p><strong>BMR:</strong> Basal Metabolic Rate sử dụng công thức Harris-Benedict</p>
+                    <p><strong>TDEE:</strong> Total Daily Energy Expenditure = BMR × Activity Factor</p>
+                    <p><strong>AI Prediction:</strong> Sử dụng machine learning model (.pkl) để dự đoán tỷ lệ mỡ</p>
+                    <p><strong>Các chỉ số khác:</strong> Lean Body Mass, Water %, Muscle Mass, Bone Mass, Protein %, Visceral Fat, Ideal Weight</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>4. AI Khuyến nghị</h4>
+                    <p><strong>Google Gemini AI:</strong> Phân tích tất cả chỉ số, đưa ra nhận xét chi tiết và khuyến nghị sức khỏe</p>
+                    <p><strong>Prompt Engineering:</strong> Sử dụng prompt template để đảm bảo AI trả lời bằng tiếng Việt, có cấu trúc rõ ràng</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>5. Lưu trữ và Hiển thị</h4>
+                    <p><strong>CSV Storage:</strong> Tự động lưu kết quả vào file user_data.csv với timestamp</p>
+                    <p><strong>MQTT:</strong> Gửi dữ liệu lên MQTT broker để tích hợp với hệ thống IoT</p>
+                    <p><strong>Web UI:</strong> Hiển thị kết quả trong modal popup và trang chi tiết với biểu đồ</p>
+                </div>
+            </div>
+
+            <!-- Cấu trúc dự án -->
+            <div class="section">
+                <h2>📁 Cấu trúc dự án</h2>
+                
+                <h3>📋 Mô tả các module chính</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🌐 Web Application</h4>
+                        <p><strong>app.py:</strong> Flask server với RESTful API</p>
+                        <p><strong>templates/:</strong> HTML templates với Bootstrap</p>
+                        <p><strong>static/:</strong> CSS, JavaScript, biểu đồ</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>🖥️ Desktop Application</h4>
+                        <p><strong>main.py:</strong> Tkinter GUI với Material Design</p>
+                        <p><strong>Custom widgets:</strong> ModernButton, ModernEntry</p>
+                        <p><strong>Event handling:</strong> Asynchronous operations</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>🧮 Calculation Engine</h4>
+                        <p><strong>calc_metrics.py:</strong> Công thức BMI, BMR, TDEE</p>
+                        <p><strong>calc_body_composition.py:</strong> Tổng hợp 11+ chỉ số</p>
+                        <p><strong>Validation:</strong> Range checking, overflow protection</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>🤖 AI & Machine Learning</h4>
+                        <p><strong>ai_predict.py:</strong> ML models với Scikit-learn</p>
+                        <p><strong>ai_recommendations.py:</strong> Google Gemini integration</p>
+                        <p><strong>pkl/:</strong> Serialized models (body_fat prediction)</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>📡 Hardware Integration</h4>
+                        <p><strong>data_parser.py:</strong> Bluetooth data parsing</p>
+                        <p><strong>mqtt_client_handler.py:</strong> IoT connectivity</p>
+                        <p><strong>oneleg_timer.py:</strong> Pose detection với MediaPipe</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>📱 Computer Vision</h4>
+                        <p><strong>qr_scaner.py:</strong> CCCD QR scanning</p>
+                        <p><strong>OpenCV + PyZbar:</strong> Real-time processing</p>
+                        <p><strong>Data extraction:</strong> Vietnamese CCCD format</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>💾 Data Management</h4>
+                        <p><strong>csv_update.py:</strong> CSV data persistence</p>
+                        <p><strong>info_user.py:</strong> User session management</p>
+                        <p><strong>user_data/:</strong> Historical data storage</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>🔧 Configuration</h4>
+                        <p><strong>requirements.txt:</strong> Python dependencies</p>
+                        <p><strong>web_requirements.txt:</strong> Web-specific packages</p>
+                        <p><strong>Documentation:</strong> README, Quick Start guides</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Endpoints -->
+            <div class="section">
+                <h2>🔌 API Endpoints</h2>
+                
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/calculate</span>
+                    <p>Tính toán các chỉ số cơ thể dựa trên thông tin người dùng</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/scan-cccd</span>
+                    <p>Quét mã QR CCCD và trả về thông tin đã trích xuất</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/start-weight-measurement</span>
+                    <p>Bắt đầu đo cân nặng từ Bluetooth scale</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method">GET</span> <span class="url">/api/get-current-weight</span>
+                    <p>Lấy cân nặng hiện tại từ scale</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/confirm-weight</span>
+                    <p>Xác nhận cân nặng và chuyển sang bước tính toán</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/balance-test</span>
+                    <p>Đo thời gian thăng bằng đứng 1 chân</p>
+                </div>
+                
+                <div class="api-endpoint">
+                    <span class="method">GET</span> <span class="url">/api/get-history/&lt;name&gt;</span>
+                    <p>Lấy lịch sử đo của người dùng</p>
+                </div>
+            </div>
+
+            <!-- Phân tích sâu về thuật toán và kỹ thuật -->
+            <div class="section">
+                <h2>🔬 Phân tích sâu về thuật toán và kỹ thuật</h2>
+                
+                <h3>🧮 Thuật toán tính toán thành phần cơ thể</h3>
+                
+                <div class="workflow-step">
+                    <h4>1. Thuật toán BMI (Body Mass Index)</h4>
+                    <p><strong>Công thức:</strong> BMI = weight(kg) / height(m)²</p>
+                    <p><strong>Đánh giá:</strong> Phân loại theo WHO: Thiếu cân (&lt;18.5), Bình thường (18.5-24.9), Thừa cân (25-29.9), Béo phì (≥30)</p>
+                    <p><strong>Khuyến nghị:</strong> Tự động tính toán cân nặng cần tăng/giảm để đạt BMI lý tưởng</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>2. Thuật toán BMR (Basal Metabolic Rate)</h4>
+                    <p><strong>Công thức Harris-Benedict:</strong></p>
+                    <ul>
+                        <li><strong>Nam:</strong> BMR = 88.362 + (13.397 × weight) + (4.799 × height) - (5.677 × age)</li>
+                        <li><strong>Nữ:</strong> BMR = 447.593 + (9.247 × weight) + (3.098 × height) - (4.330 × age)</li>
+                    </ul>
+                    <p><strong>TDEE:</strong> Total Daily Energy Expenditure = BMR × Activity Factor</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>3. Thuật toán Lean Body Mass (LBM)</h4>
+                    <p><strong>Công thức:</strong></p>
+                    <ul>
+                        <li><strong>Nam:</strong> LBM = (0.32810 × weight) + (0.33929 × height) - 29.5336</li>
+                        <li><strong>Nữ:</strong> LBM = (0.29569 × weight) + (0.41813 × height) - 43.2933</li>
+                    </ul>
+                    <p><strong>Ứng dụng:</strong> Cơ sở để tính toán các chỉ số khác như tỷ lệ mỡ, khối lượng cơ</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>4. Thuật toán tính tỷ lệ mỡ cơ thể</h4>
+                    <p><strong>Phương pháp:</strong> Sử dụng LBM và các hệ số điều chỉnh theo giới tính, tuổi</p>
+                    <p><strong>Công thức:</strong> Fat% = (1.0 - (((LBM - const) × coefficient) / weight)) × 100</p>
+                    <p><strong>Hệ số điều chỉnh:</strong> Dựa trên giới tính, tuổi, cân nặng, chiều cao</p>
+                    <p><strong>Giới hạn:</strong> 5% - 75% với validation overflow</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>5. Thuật toán tính tỷ lệ nước</h4>
+                    <p><strong>Công thức:</strong> Water% = (100 - Fat%) × 0.7</p>
+                    <p><strong>Hệ số điều chỉnh:</strong> 1.02 nếu ≤50%, 0.98 nếu >50%</p>
+                    <p><strong>Giới hạn:</strong> 35% - 75%</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>6. Thuật toán tính khối lượng xương</h4>
+                    <p><strong>Công thức:</strong> Bone Mass = (base - (LBM × 0.05158)) × -1</p>
+                    <p><strong>Base values:</strong> Nam: 0.18016894, Nữ: 0.245691014</p>
+                    <p><strong>Điều chỉnh:</strong> ±0.1 tùy theo giá trị, giới hạn tối đa 8kg</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>7. Thuật toán tính mỡ nội tạng</h4>
+                    <p><strong>Điều kiện:</strong> height < weight × 1.6</p>
+                    <p><strong>Công thức phức tạp:</strong> Sử dụng các hệ số toán học dựa trên chiều cao, cân nặng, tuổi</p>
+                    <p><strong>Giới hạn:</strong> 1 - 50</p>
+                </div>
+
+                <h3>🤖 Machine Learning và AI</h3>
+                
+                <div class="workflow-step">
+                    <h4>1. Model dự đoán tỷ lệ mỡ (body_fat.pkl)</h4>
+                    <p><strong>Input features:</strong> age, gender (0/1), height_cm, weight_kg</p>
+                    <p><strong>Model type:</strong> Scikit-learn model được serialize bằng joblib</p>
+                    <p><strong>Preprocessing:</strong> Gender encoding (male=1, female=0)</p>
+                    <p><strong>Output:</strong> Tỷ lệ mỡ cơ thể với độ chính xác cao</p>
+                </div>
+
+
+                <div class="workflow-step">
+                    <h4>2. AI Recommendation Engine (Google Gemini)</h4>
+                    <p><strong>Model:</strong> gemini-2.0-flash với temperature=0.1</p>
+                    <p><strong>Prompt Engineering:</strong> Structured prompt với system message và user input</p>
+                    <p><strong>Input:</strong> Tất cả chỉ số sức khỏe + thông tin cá nhân</p>
+                    <p><strong>Output:</strong> Khuyến nghị sức khỏe bằng tiếng Việt, có cấu trúc rõ ràng</p>
+                </div>
+
+                <h3>📡 Bluetooth và IoT</h3>
+                
+                <div class="workflow-step">
+                    <h4>1. Bluetooth Low Energy (BLE) Protocol</h4>
+                    <p><strong>Library:</strong> Bleak (asynchronous BLE client)</p>
+                    <p><strong>Device Discovery:</strong> find_device_by_name() với timeout</p>
+                    <p><strong>Characteristic UUID:</strong> 0000FFB2-0000-1000-8000-00805F9B34FB</p>
+                    <p><strong>Notification Handler:</strong> Real-time data streaming với callback</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>2. Data Parser Algorithm</h4>
+                    <p><strong>Crenot Gofit S2:</strong> weight = (int(data.hex()[13:18], 16) - 524288) / 1000</p>
+                    <p><strong>Mi Scale 2:</strong> weight = int.from_bytes(data[1:3], byteorder='little') / 200</p>
+                    <p><strong>Error Handling:</strong> Try-catch với fallback values</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>3. MQTT Integration</h4>
+                    <p><strong>Broker:</strong> app.coreiot.io:1883</p>
+                    <p><strong>Topic:</strong> v1/devices/me/telemetry</p>
+                    <p><strong>QoS:</strong> Quality of Service levels cho reliability</p>
+                    <p><strong>Data Format:</strong> JSON payload với timestamp</p>
+                </div>
+
+                <h3>📱 Computer Vision và QR Scanning</h3>
+                
+                <div class="workflow-step">
+                    <h4>1. QR Code Detection Pipeline</h4>
+                    <p><strong>Library:</strong> OpenCV + PyZbar</p>
+                    <p><strong>Process:</strong> Frame capture → QR detection → Data extraction → Validation</p>
+                    <p><strong>Cooldown:</strong> 1 giây giữa các lần scan để tránh duplicate</p>
+                    <p><strong>Error Handling:</strong> Camera permission, invalid QR format</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>2. CCCD Data Parsing</h4>
+                    <p><strong>Format:</strong> Vietnamese CCCD QR standard</p>
+                    <p><strong>Extraction:</strong> Name, DOB, Gender, ID, Address</p>
+                    <p><strong>Validation:</strong> Date format, gender mapping, data integrity</p>
+                </div>
+
+                <h3>⚖️ Pose Detection và Balance Analysis</h3>
+                
+                <div class="workflow-step">
+                    <h4>1. MediaPipe Pose Detection</h4>
+                    <p><strong>Model:</strong> MediaPipe Pose với confidence thresholds</p>
+                    <p><strong>Landmarks:</strong> 33 pose landmarks với x,y coordinates</p>
+                    <p><strong>Processing:</strong> Real-time frame analysis với 30fps</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>2. Balance Detection Algorithm</h4>
+                    <p><strong>Baseline Collection:</strong> 20 samples đứng 2 chân</p>
+                    <p><strong>One-leg Collection:</strong> 20 samples đứng 1 chân</p>
+                    <p><strong>Similarity Calculation:</strong> Cosine similarity giữa current pose và samples</p>
+                    <p><strong>Center of Mass:</strong> Trung bình tọa độ hip landmarks</p>
+                    <p><strong>Offset Tracking:</strong> Độ lệch trọng tâm theo thời gian</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>3. Session Management</h4>
+                    <p><strong>State Machine:</strong> Idle → Collecting → Measuring → Complete</p>
+                    <p><strong>Timer:</strong> Real-time session duration tracking</p>
+                    <p><strong>Data Aggregation:</strong> Average offset, max duration, stability metrics</p>
+                </div>
+            </div>
+
+            <!-- Công nghệ sử dụng -->
+            <div class="section">
+                <h2>🛠️ Công nghệ sử dụng</h2>
+                
+                <h3>Backend & Core</h3>
+                <div class="tech-stack">
+                    <span class="tech-tag">Python 3.8+</span>
+                    <span class="tech-tag">Flask</span>
+                    <span class="tech-tag">Tkinter</span>
+                    <span class="tech-tag">Asyncio</span>
+                    <span class="tech-tag">Threading</span>
+                </div>
+                
+                <h3>Bluetooth & IoT</h3>
+                <div class="tech-stack">
+                    <span class="tech-tag">Bleak (BLE)</span>
+                    <span class="tech-tag">MQTT</span>
+                    <span class="tech-tag">Crenot Gofit S2</span>
+                    <span class="tech-tag">Mi Scale 2</span>
+                </div>
+                
+                <h3>AI & Machine Learning</h3>
+                <div class="tech-stack">
+                    <span class="tech-tag">Google Gemini AI</span>
+                    <span class="tech-tag">LangChain</span>
+                    <span class="tech-tag">Scikit-learn</span>
+                    <span class="tech-tag">Pickle (.pkl)</span>
+                </div>
+                
+                <h3>Computer Vision</h3>
+                <div class="tech-stack">
+                    <span class="tech-tag">OpenCV</span>
+                    <span class="tech-tag">PyZbar</span>
+                    <span class="tech-tag">QR Code Scanner</span>
+                </div>
+                
+                <h3>Frontend & Web</h3>
+                <div class="tech-stack">
+                    <span class="tech-tag">HTML5</span>
+                    <span class="tech-tag">CSS3</span>
+                    <span class="tech-tag">JavaScript ES6+</span>
+                    <span class="tech-tag">Bootstrap 5</span>
+                    <span class="tech-tag">Chart.js</span>
+                    <span class="tech-tag">Material Design</span>
+                </div>
+                
+                <h3>Data & Storage</h3>
+                <div class="tech-stack">
+                    <span class="tech-tag">CSV</span>
+                    <span class="tech-tag">Pandas</span>
+                    <span class="tech-tag">JSON</span>
+                    <span class="tech-tag">Session Management</span>
+                </div>
+            </div>
+
+            <!-- Biểu đồ kiến trúc hệ thống -->
+            <div class="section">
+                <h2>🏗️ Kiến trúc hệ thống</h2>
+                <div class="flowchart-container">
+                    <div class="mermaid">
+                        graph TB
+                            subgraph "🌐 Frontend Layer"
+                                A[Web Browser]
+                                B[HTML/CSS/JS]
+                                C[Bootstrap UI]
+                            end
+                            
+                            subgraph "🖥️ Application Layer"
+                                D[Flask Web App]
+                                E[Tkinter Desktop App]
+                                F[API Endpoints]
+                            end
+                            
+                            subgraph "🧠 Business Logic Layer"
+                                G[User Info Manager]
+                                H[Body Composition Calculator]
+                                I[AI Recommendation Engine]
+                                J[QR Scanner Handler]
+                            end
+                            
+                            subgraph "📡 Hardware Interface Layer"
+                                K[Bluetooth BLE Client]
+                                L[MQTT Client]
+                                M[Camera Interface]
+                            end
+                            
+                            subgraph "🔧 External Services"
+                                N[Google Gemini AI]
+                                O[MQTT Broker]
+                                P[Bluetooth Scale Devices]
+                            end
+                            
+                            subgraph "💾 Data Layer"
+                                Q[CSV Files]
+                                R[Pickle Models]
+                                S[Session Storage]
+                            end
+                            
+                            A --> B
+                            B --> C
+                            C --> D
+                            D --> F
+                            E --> F
+                            F --> G
+                            F --> H
+                            F --> I
+                            F --> J
+                            G --> K
+                            H --> L
+                            I --> N
+                            J --> M
+                            K --> P
+                            L --> O
+                            H --> Q
+                            I --> R
+                            G --> S
+                            
+                            style A fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+                            style D fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+                            style E fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
+                            style I fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+                            style N fill:#fce4ec,stroke:#e91e63,stroke-width:2px
+                            style P fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+                            style Q fill:#f1f8e9,stroke:#8bc34a,stroke-width:2px
+                    </div>
+                </div>
+                
+                <h3>🔍 Phân tích chi tiết kiến trúc hệ thống</h3>
+                
+                <div class="workflow-step">
+                    <h4>1. Frontend Layer (Tầng giao diện người dùng)</h4>
+                    <p><strong>Web Browser:</strong> Hỗ trợ đa trình duyệt với responsive design</p>
+                    <p><strong>HTML/CSS/JS:</strong> Sử dụng HTML5 semantic, CSS3 với Flexbox/Grid, JavaScript ES6+ với async/await</p>
+                    <p><strong>Bootstrap UI:</strong> Framework CSS với Material Design principles, custom components</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>2. Application Layer (Tầng ứng dụng)</h4>
+                    <p><strong>Flask Web App:</strong> Micro-framework với Blueprint pattern, RESTful API design</p>
+                    <p><strong>Tkinter Desktop App:</strong> Native GUI với custom widgets, event-driven architecture</p>
+                    <p><strong>API Endpoints:</strong> RESTful design với JSON serialization, error handling middleware</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>3. Business Logic Layer (Tầng logic nghiệp vụ)</h4>
+                    <p><strong>User Info Manager:</strong> Singleton pattern, data validation, session management</p>
+                    <p><strong>Body Composition Calculator:</strong> Mathematical algorithms, statistical models</p>
+                    <p><strong>AI Recommendation Engine:</strong> Prompt engineering, natural language processing</p>
+                    <p><strong>QR Scanner Handler:</strong> Computer vision pipeline, image processing</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>4. Hardware Interface Layer (Tầng giao tiếp phần cứng)</h4>
+                    <p><strong>Bluetooth BLE Client:</strong> Asynchronous I/O, device discovery, characteristic notifications</p>
+                    <p><strong>MQTT Client:</strong> Publish-subscribe pattern, QoS levels, connection management</p>
+                    <p><strong>Camera Interface:</strong> OpenCV pipeline, real-time processing, frame capture</p>
+                </div>
+
+                <div class="workflow-step">
+                    <h4>5. Data Layer (Tầng dữ liệu)</h4>
+                    <p><strong>CSV Files:</strong> Structured data storage, append-only logging, data integrity</p>
+                    <p><strong>Pickle Models:</strong> Serialized ML models, version control, model persistence</p>
+                    <p><strong>Session Storage:</strong> In-memory caching, user state management, data isolation</p>
+                </div>
+            </div>
+
+            <!-- Tính năng nổi bật -->
+            <div class="section">
+                <h2>⭐ Tính năng nổi bật</h2>
+                
+                <div class="highlight">
+                    <h4>🎯 Tích hợp đa nền tảng</h4>
+                    <p>Hỗ trợ cả web application (Flask) và desktop application (Tkinter), cho phép người dùng linh hoạt trong việc sử dụng</p>
+                </div>
+                
+                <div class="highlight">
+                    <h4>🔗 Kết nối Bluetooth thông minh</h4>
+                    <p>Tự động tìm kiếm và kết nối với cân thông minh, hỗ trợ nhiều loại thiết bị với giao thức BLE chuẩn</p>
+                </div>
+                
+                <div class="highlight">
+                    <h4>📱 Quét CCCD tự động</h4>
+                    <p>Sử dụng computer vision để quét và trích xuất thông tin từ mã QR CCCD, giảm thiểu việc nhập liệu thủ công</p>
+                </div>
+                
+                <div class="highlight">
+                    <h4>🤖 AI khuyến nghị cá nhân hóa</h4>
+                    <p>Tích hợp Google Gemini AI để phân tích toàn diện các chỉ số sức khỏe và đưa ra khuyến nghị phù hợp với từng cá nhân</p>
+                </div>
+                
+                <div class="highlight">
+                    <h4>📊 Giao diện trực quan</h4>
+                    <p>Thiết kế Material Design với biểu đồ tương tác, responsive design hỗ trợ mọi thiết bị</p>
+                </div>
+                
+                <div class="highlight">
+                    <h4>💾 Lưu trữ và theo dõi</h4>
+                    <p>Tự động lưu lịch sử đo, tích hợp MQTT để kết nối với hệ thống IoT, xuất dữ liệu CSV</p>
+                </div>
+            </div>
+
+            <!-- Cách sử dụng -->
+            <div class="section">
+                <h2>🚀 Cách sử dụng</h2>
+                
+                <h3>Web Application</h3>
+                <ol>
+                    <li><strong>Cài đặt:</strong> <code>pip install -r web_requirements.txt</code></li>
+                    <li><strong>Chạy:</strong> <code>python app.py</code></li>
+                    <li><strong>Truy cập:</strong> <code>http://localhost:5000</code></li>
+                    <li><strong>Chọn phương thức:</strong> Nhập thủ công hoặc quét CCCD</li>
+                    <li><strong>Đo cân nặng:</strong> Kết nối Bluetooth scale và đo</li>
+                    <li><strong>Xem kết quả:</strong> Nhận khuyến nghị AI và lưu dữ liệu</li>
+                </ol>
+                
+                <h3>Desktop Application</h3>
+                <ol>
+                    <li><strong>Cài đặt:</strong> <code>pip install -r requirements.txt</code></li>
+                    <li><strong>Chạy:</strong> <code>python main.py</code></li>
+                    <li><strong>Nhập thông tin:</strong> Quét CCCD và nhập chiều cao</li>
+                    <li><strong>Đo cân nặng:</strong> Tự động kết nối và đo từ scale</li>
+                    <li><strong>Nhận kết quả:</strong> Xem khuyến nghị và lưu dữ liệu</li>
+                </ol>
+            </div>
+
+            <!-- Kết luận -->
+            <div class="section">
+                <h2>🎯 Kết luận</h2>
+                <p><strong>Hệ thống chăm sóc sức khỏe điện tử</strong> (Xiaomi Smart Scale) là một dự án toàn diện kết hợp nhiều công nghệ hiện đại để tạo ra một hệ thống đo và phân tích sức khỏe thông minh. Dự án không chỉ đơn thuần là một ứng dụng đo cân nặng mà còn là một giải pháp tích hợp AI, IoT, Computer Vision, và web technology để cung cấp trải nghiệm người dùng tốt nhất.</p>
+                
+                <div class="highlight">
+                    <h4>🏆 Thành tựu kỹ thuật nổi bật</h4>
+                    <ul>
+                        <li><strong>Kiến trúc phân lớp:</strong> 5 tầng rõ ràng với separation of concerns</li>
+                        <li><strong>Thuật toán chính xác:</strong> 11+ chỉ số sức khỏe với công thức khoa học</li>
+                        <li><strong>AI Integration:</strong> Google Gemini với prompt engineering tối ưu</li>
+                        <li><strong>Real-time Processing:</strong> Bluetooth BLE, Computer Vision, Pose Detection</li>
+                        <li><strong>Machine Learning:</strong> 2 ML models với Scikit-learn và joblib</li>
+                        <li><strong>IoT Connectivity:</strong> MQTT protocol với QoS levels</li>
+                    </ul>
+                </div>
+                
+                <p><strong>Điểm mạnh của dự án:</strong></p>
+                <ul>
+                    <li><strong>Kiến trúc modular:</strong> Dễ mở rộng, bảo trì và test</li>
+                    <li><strong>Đa nền tảng:</strong> Web (Flask) + Desktop (Tkinter) với shared business logic</li>
+                    <li><strong>AI cá nhân hóa:</strong> Khuyến nghị sức khỏe dựa trên phân tích toàn diện</li>
+                    <li><strong>Giao diện hiện đại:</strong> Material Design, responsive, accessible</li>
+                    <li><strong>Hardware integration:</strong> Hỗ trợ nhiều loại cân thông minh</li>
+                    <li><strong>Data persistence:</strong> CSV storage, session management, history tracking</li>
+                    <li><strong>Computer Vision:</strong> QR scanning, pose detection, balance analysis</li>
+                </ul>
+                
+                <div class="highlight">
+                    <h4>🔬 Đóng góp khoa học và kỹ thuật</h4>
+                    <p>Dự án thể hiện sự kết hợp hài hòa giữa:</p>
+                    <ul>
+                        <li><strong>Biomedical Engineering:</strong> Các công thức tính toán thành phần cơ thể chuẩn quốc tế</li>
+                        <li><strong>Machine Learning:</strong> Predictive models cho body fat và gender classification</li>
+                        <li><strong>Computer Vision:</strong> Real-time pose detection và balance analysis</li>
+                        <li><strong>IoT & Connectivity:</strong> Bluetooth BLE, MQTT, real-time data streaming</li>
+                        <li><strong>Software Engineering:</strong> Clean architecture, design patterns, error handling</li>
+                        <li><strong>User Experience:</strong> Intuitive interface, accessibility, responsive design</li>
+                    </ul>
+                </div>
+                
+                <p>Dự án này không chỉ là một ứng dụng đo cân nặng mà là một <strong>hệ thống chăm sóc sức khỏe điện tử hoàn chỉnh</strong>, kết hợp hardware (Bluetooth scale), software (Python applications), AI (Google Gemini), Computer Vision (MediaPipe), và web technology để tạo ra một sản phẩm phục vụ nhu cầu chăm sóc sức khỏe cá nhân hóa và chính xác của người dùng.</p>
+                
+                <div class="highlight">
+                    <h4>🚀 Tiềm năng phát triển</h4>
+                    <p>Hệ thống có thể được mở rộng với:</p>
+                    <ul>
+                        <li>Tích hợp thêm các thiết bị IoT khác (smartwatch, blood pressure monitor)</li>
+                        <li>Machine Learning models nâng cao cho dự đoán sức khỏe</li>
+                        <li>Telemedicine integration cho tư vấn y tế từ xa</li>
+                        <li>Mobile app development với React Native/Flutter</li>
+                        <li>Cloud deployment với AWS/Azure</li>
+                        <li>Blockchain integration cho bảo mật dữ liệu y tế</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Khởi tạo Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>
