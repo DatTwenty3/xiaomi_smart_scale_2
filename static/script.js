@@ -695,39 +695,16 @@ function resetBalanceModal() {
     // Reset button states
     document.getElementById('startBalanceBtn').disabled = false;
     document.getElementById('balanceTime').textContent = '0';
+    // Dừng camera nếu đang chạy
+    stopBalanceCamera();
 }
 
 function startBalanceTest() {
-    // Ẩn trạng thái ban đầu và hiển thị trạng thái đang đo
+    // Ẩn trạng thái ban đầu và hiển thị trạng thái đang đo (client-side)
     document.getElementById('balanceTestStatus').style.display = 'none';
     document.getElementById('balanceTestRunning').style.display = 'block';
     
-    // Gọi API đo thăng bằng
-    fetch('/api/balance-test', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            // Hiển thị kết quả
-            document.getElementById('balanceTime').textContent = result.balance_time.toFixed(1);
-            document.getElementById('balanceTestRunning').style.display = 'none';
-            document.getElementById('balanceTestResult').style.display = 'block';
-            
-            showNotification(`Đo thăng bằng thành công: ${result.balance_time.toFixed(1)} giây`, 'success');
-        } else {
-            showNotification(result.message, 'error');
-            resetBalanceModal();
-        }
-    })
-    .catch(error => {
-        console.error('Error testing balance:', error);
-        showNotification('Lỗi khi đo thăng bằng', 'error');
-        resetBalanceModal();
-    });
+    startClientSideBalanceDetection();
 }
 
 function retryBalanceTest() {
@@ -1701,3 +1678,343 @@ function showNotification(message, type = 'info') {
 document.addEventListener('DOMContentLoaded', function() {
     initializeQRScanner();
 });
+
+// ==============================================================================
+// CLIENT-SIDE ONE-LEG BALANCE DETECTION (MediaPipe)
+// ==============================================================================
+
+let balanceVideoEl = null;
+let balanceCanvasEl = null;
+let balanceCtx = null;
+let balanceStream = null;
+let pose = null;
+
+let twoLegSamples = [];
+let oneLegSamples = [];
+let collectingPhase = 'idle'; // 'two_legs' | 'one_leg' | 'measure'
+let collectedCount = 0;
+let targetSamples = 20;
+let phaseStartTs = 0;
+let sessionActive = false;
+let sessionStartTs = 0;
+let sessionOffsets = [];
+let baselineCOM = null;
+let measureRAF = null;
+let measureTimer = null;
+let restCountdownTimer = null;
+let restSecondsLeft = 0;
+let isResting = false;
+const ONE_LEG_SIM_THRESHOLD = 0.8; // Ngưỡng 80% để xác nhận tư thế đứng 1 chân
+
+function updateBalancePhaseLabel(text) {
+    const badge = document.getElementById('balancePhaseLabel');
+    if (badge) badge.textContent = text;
+    const heading = document.getElementById('balanceInstruction');
+    if (heading) heading.textContent = text;
+}
+
+function landmarksToVector(landmarks) {
+    const vector = [];
+    for (const lm of landmarks) {
+        vector.push(lm.x, lm.y);
+    }
+    return vector;
+}
+
+function cosineSimilarity(a, b) {
+    let dot = 0, na = 0, nb = 0;
+    const len = Math.min(a.length, b.length);
+    for (let i = 0; i < len; i++) {
+        dot += a[i] * b[i];
+        na += a[i] * a[i];
+        nb += b[i] * b[i];
+    }
+    if (na === 0 || nb === 0) return 0;
+    return dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
+
+function calcMaxSimilarity(currentVector, samples) {
+    let maxSim = 0;
+    for (const s of samples) {
+        const sim = cosineSimilarity(currentVector, s);
+        if (sim > maxSim) maxSim = sim;
+    }
+    return maxSim;
+}
+
+async function startClientSideBalanceDetection() {
+    try {
+        balanceVideoEl = document.getElementById('balanceVideo');
+        balanceCanvasEl = document.getElementById('balanceCanvas');
+        balanceCtx = balanceCanvasEl.getContext('2d');
+        updateBalancePhaseLabel('Chuẩn bị...');
+
+        // Camera access
+        balanceStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+        balanceVideoEl.srcObject = balanceStream;
+        await balanceVideoEl.play();
+
+        // Init MediaPipe Pose
+        pose = new Pose({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
+        });
+        pose.setOptions({ modelComplexity: 1, smoothLandmarks: true, enableSegmentation: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+        // Gắn handler: vừa vẽ landmarks, vừa cập nhật state machine
+        pose.onResults((results) => {
+            lastPoseLandmarks = results.poseLandmarks || null;
+            onPoseResults(results);
+            advanceBalanceState();
+        });
+
+        // Start pipeline using Camera utils if available
+        startCollectionSequence();
+    } catch (e) {
+        console.error(e);
+        showNotification('Không thể truy cập camera hoặc khởi tạo Pose', 'error');
+        resetBalanceModal();
+    }
+}
+
+function startCollectionSequence() {
+    twoLegSamples = [];
+    oneLegSamples = [];
+    collectedCount = 0;
+    sessionActive = false;
+    sessionOffsets = [];
+    baselineCOM = null;
+    // Nghỉ/chuẩn bị 5s trước khi bắt đầu thu mẫu 2 chân
+    collectingPhase = 'pre_rest';
+    phaseStartTs = performance.now();
+    updateCountsUI();
+    showPhase('rest');
+    startRestCountdown(5, () => {
+        collectingPhase = 'two_legs';
+        updateBalancePhaseLabel('ĐỨNG HAI CHÂN, NHÌN THẲNG – ĐANG THU MẪU');
+        showPhase('collect_two');
+    }, 'Chuẩn bị cho quá trình thu thập mẫu đứng 2 chân');
+    requestAnimationFrame(processVideoFrame);
+}
+
+function onPoseResults(results) {
+    const video = balanceVideoEl;
+    const canvas = balanceCanvasEl;
+    const ctx = balanceCtx;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw camera frame under canvas overlay (optional draw landmarks only)
+    // We only draw landmarks to overlay for speed
+    if (results.poseLandmarks) {
+        drawLandmarksOverlay(ctx, results.poseLandmarks, canvas.width, canvas.height);
+    }
+}
+
+function drawLandmarksOverlay(ctx, landmarks, w, h) {
+    ctx.strokeStyle = 'rgba(0,255,0,0.8)';
+    ctx.lineWidth = 2;
+    for (const lm of landmarks) {
+        ctx.beginPath();
+        ctx.arc(lm.x * w, lm.y * h, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,255,0,0.8)';
+        ctx.fill();
+    }
+}
+
+async function processVideoFrame() {
+    if (!balanceVideoEl || balanceVideoEl.readyState < 2) {
+        measureRAF = requestAnimationFrame(processVideoFrame);
+        return;
+    }
+    await pose.send({ image: balanceVideoEl });
+
+    // After pose results callback drew overlay, we also run state machine by estimating landmarks again
+    // To avoid double compute, we rely on lastResults via pose.onResults closure; but mediapipe doesn't expose.
+    // Instead, we run lightweight checks using a cached canvas read is not needed; we will recompute with another send next frame.
+
+    // Use last known landmarks from the previous draw stored globally? We'll re-fetch via a simple trick: not available.
+    // So we attach landmarks on balanceCanvas for state; easier approach: store to window in onPoseResults.
+    measureRAF = requestAnimationFrame(processVideoFrame);
+}
+
+// Hook landmarks for state machine
+let lastPoseLandmarks = null;
+
+function advanceBalanceState() {
+    if (!lastPoseLandmarks) return;
+    const vector = landmarksToVector(lastPoseLandmarks);
+    const w = balanceCanvasEl.width;
+    const h = balanceCanvasEl.height;
+    const leftHip = lastPoseLandmarks[23]; // LEFT_HIP index in MediaPipe Pose v0.5
+    const rightHip = lastPoseLandmarks[24];
+    if (!leftHip || !rightHip) return;
+    const centerHipX = (leftHip.x + rightHip.x) / 2;
+    const centerHipY = (leftHip.y + rightHip.y) / 2;
+    const currentCOM = [Math.round(centerHipX * w), Math.round(centerHipY * h)];
+
+    if (collectingPhase === 'two_legs') {
+        // Thu thập tối đa 1 mẫu/200ms để tránh bùng nổ mẫu
+        throttleCollectSample(twoLegSamples, vector);
+        if (twoLegSamples.length >= targetSamples) {
+            if (!isResting) {
+                collectedCount = 0;
+                // Vào trạng thái nghỉ để tránh gọi lặp
+                collectingPhase = 'rest_two_to_one';
+                showPhase('rest');
+                startRestCountdown(5, () => {
+                    collectingPhase = 'one_leg';
+                    updateBalancePhaseLabel('ĐỨNG MỘT CHÂN – ĐANG THU MẪU');
+                    showPhase('collect_one');
+                }, 'Chuẩn bị cho quá trình thu thập mẫu đứng 1 chân');
+            }
+        }
+        return;
+    }
+
+    if (collectingPhase === 'one_leg') {
+        throttleCollectSample(oneLegSamples, vector);
+        if (oneLegSamples.length >= targetSamples) {
+            if (!isResting) {
+                // Vào trạng thái nghỉ để tránh gọi lặp
+                collectingPhase = 'rest_one_to_measure';
+                showPhase('rest');
+                startRestCountdown(5, () => {
+                    collectingPhase = 'measure';
+                    sessionActive = false;
+                    sessionOffsets = [];
+                    baselineCOM = null;
+                    sessionStartTs = 0;
+                    updateBalancePhaseLabel('BẮT ĐẦU ĐO – GIỮ MỘT CHÂN CÀNG LÂU CÀNG TỐT');
+                    showPhase('measure');
+                }, 'Chuẩn bị cho quá trình đo thăng bằng');
+            }
+        }
+        return;
+    }
+
+    if (collectingPhase === 'measure') {
+        const oneSim = calcMaxSimilarity(vector, oneLegSamples);
+        const twoSim = calcMaxSimilarity(vector, twoLegSamples);
+        if (oneSim > twoSim && oneSim >= ONE_LEG_SIM_THRESHOLD) {
+            if (!sessionActive) {
+                sessionActive = true;
+                sessionStartTs = performance.now();
+                sessionOffsets = [];
+                if (!baselineCOM) baselineCOM = currentCOM;
+            }
+            const offset = Math.abs(currentCOM[0] - baselineCOM[0]);
+            sessionOffsets.push(offset);
+            updateElapsedTime();
+        } else {
+            if (sessionActive) {
+                finishBalanceSession();
+            }
+        }
+    }
+}
+
+// Thu thập mẫu có kiểm soát tốc độ (~5 mẫu/giây)
+let lastSampleTs = 0;
+function throttleCollectSample(bucket, vector) {
+    if (isResting) return; // Không thu mẫu khi đang nghỉ
+    const now = performance.now();
+    if (now - lastSampleTs < 500) return; // 0.5s/mẫu
+    lastSampleTs = now;
+    if (bucket.length < targetSamples) bucket.push(vector);
+    updateCountsUI();
+}
+
+function updateCountsUI() {
+    const c1 = document.getElementById('countTwoLegs');
+    const c2 = document.getElementById('countOneLeg');
+    const t1 = document.getElementById('targetSamples');
+    const t2 = document.getElementById('targetSamples2');
+    if (c1) c1.textContent = (collectingPhase === 'two_legs' ? twoLegSamples.length : oneLegSamples.length).toString();
+    if (t1) t1.textContent = targetSamples.toString();
+}
+
+function startRestCountdown(seconds, onDone, prepareLabel) {
+    isResting = true;
+    restSecondsLeft = seconds;
+    const el = document.getElementById('balanceCountdown');
+    if (el) {
+        el.style.display = 'block';
+        el.textContent = `${restSecondsLeft}`;
+    }
+    updateBalancePhaseLabel(prepareLabel || 'Chuẩn bị');
+    if (restCountdownTimer) clearInterval(restCountdownTimer);
+    restCountdownTimer = setInterval(() => {
+        restSecondsLeft -= 1;
+        if (el) el.textContent = `${restSecondsLeft}`;
+        if (restSecondsLeft <= 0) {
+            clearInterval(restCountdownTimer);
+            if (el) el.style.display = 'none';
+            isResting = false;
+            if (typeof onDone === 'function') onDone();
+        }
+    }, 1000);
+}
+
+function showPhase(phase) {
+    const sampleCounts = document.getElementById('balanceSampleCounts');
+    const countdown = document.getElementById('balanceCountdown');
+    const elapsed = document.getElementById('balanceElapsed');
+    const note = document.getElementById('collectNote');
+    if (!sampleCounts || !countdown || !elapsed) return;
+    if (phase === 'rest') {
+        sampleCounts.style.display = 'none';
+        elapsed.style.display = 'none';
+        countdown.style.display = 'block';
+    } else if (phase === 'collect_two') {
+        sampleCounts.style.display = 'block';
+        countdown.style.display = 'none';
+        elapsed.style.display = 'none';
+        const c1 = document.getElementById('countTwoLegs');
+        if (c1) c1.textContent = twoLegSamples.length.toString();
+        if (note) note.style.display = 'none';
+    } else if (phase === 'collect_one') {
+        sampleCounts.style.display = 'block';
+        countdown.style.display = 'none';
+        elapsed.style.display = 'none';
+        const c1 = document.getElementById('countTwoLegs');
+        if (c1) c1.textContent = oneLegSamples.length.toString();
+        if (note) note.style.display = 'none';
+    } else if (phase === 'measure') {
+        sampleCounts.style.display = 'none';
+        countdown.style.display = 'none';
+        elapsed.style.display = 'block';
+        updateElapsedTime();
+    }
+}
+
+function updateElapsedTime() {
+    const el = document.getElementById('balanceElapsed');
+    if (!el || !sessionActive) return;
+    const sec = (performance.now() - sessionStartTs) / 1000;
+    el.textContent = `${sec.toFixed(1)}s`;
+}
+
+function finishBalanceSession() {
+    const durationSec = (performance.now() - sessionStartTs) / 1000;
+    const avgOffset = sessionOffsets.length ? (sessionOffsets.reduce((a,b)=>a+b,0) / sessionOffsets.length) : 0;
+    // Show result UI
+    document.getElementById('balanceTime').textContent = durationSec.toFixed(1);
+    document.getElementById('balanceTestRunning').style.display = 'none';
+    document.getElementById('balanceTestResult').style.display = 'block';
+    showNotification(`Đo thăng bằng thành công: ${durationSec.toFixed(1)} giây`, 'success');
+    stopBalanceCamera();
+}
+
+function stopBalanceCamera() {
+    if (measureRAF) cancelAnimationFrame(measureRAF);
+    if (balanceStream) {
+        balanceStream.getTracks().forEach(t => t.stop());
+        balanceStream = null;
+    }
+    // Reset pose instance để giải phóng tài nguyên
+    try { if (pose && pose.close) pose.close(); } catch(e) {}
+    pose = null;
+    lastPoseLandmarks = null;
+    twoLegSamples = [];
+    oneLegSamples = [];
+}
