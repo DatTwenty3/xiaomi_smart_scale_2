@@ -79,7 +79,7 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
     weight = parser.data_parser(data, DEVICE_NAME)
     if weight and weight > 0:
         current_weight = weight
-        print(f"Received weight: {weight} kg")
+        print(f"📱 BLUETOOTH: Nhận được cân nặng từ thiết bị: {weight} kg")
 
 async def connect_and_measure():
     """Connect to scale and start measurements"""
@@ -93,11 +93,12 @@ async def connect_and_measure():
 
     device = await find_scale_device()
     if not device:
-        print("No scale device found")
+        print("❌ BLUETOOTH: Không tìm thấy thiết bị cân")
         weight_measurement_active = False
         return
 
-    print(f"Found device: {device.name}")
+    print(f"✅ BLUETOOTH: Đã tìm thấy thiết bị: {device.name}")
+    print("🔄 BLUETOOTH: Đang kết nối và chờ dữ liệu cân nặng...")
     weight_measurement_active = True
 
     client = BleakClient(device, disconnected_callback=disconnected_callback)
@@ -285,15 +286,37 @@ def calculate_metrics():
             # Lưu kết quả tính toán
             health_data.set_body_composition(body_composition)
             
+            # Hiển thị thông tin cân nặng nhận được
+            print(f"⚖️  CÂN NẶNG NHẬN ĐƯỢC: {weight} kg")
+            print(f"📏 CHIỀU CAO: {height} cm")
+            print(f"🧮 BMI TÍNH TOÁN: {body_composition.get('bmi', 'N/A')}")
+            print("-" * 50)
+            
             # Lưu dữ liệu vào CSV
+            print("💾 Đang lưu dữ liệu vào CSV...")
             try:
                 csv_success = cu.update_csv(user_info, body_composition)
                 if csv_success:
-                    print("✓ Đã lưu dữ liệu vào CSV thành công!")
+                    print("✅ CSV: Đã lưu dữ liệu vào CSV thành công!")
                 else:
-                    print("✗ Lỗi khi lưu dữ liệu vào CSV")
+                    print("❌ CSV: Lỗi khi lưu dữ liệu vào CSV")
             except Exception as e:
-                print(f"✗ Lỗi khi lưu CSV: {e}")
+                print(f"❌ CSV: Lỗi khi lưu CSV: {e}")
+            
+            # Publish dữ liệu lên MQTT
+            print("📡 Đang publish dữ liệu lên MQTT server...")
+            try:
+                if mqtt_client:
+                    mqtt_client.publish(MQTT_CONFIG['topic'], body_composition)
+                    print("✅ MQTT: Đã publish dữ liệu lên server thành công!")
+                    print(f"   📍 Topic: {MQTT_CONFIG['topic']}")
+                    print(f"   🏠 Broker: {MQTT_CONFIG['broker']}:{MQTT_CONFIG['port']}")
+                else:
+                    print("❌ MQTT: Client chưa được khởi tạo")
+            except Exception as e:
+                print(f"❌ MQTT: Lỗi khi publish lên server: {e}")
+            
+            print("=" * 50)
             
             # Lấy khuyến nghị AI
             ai_recommendations = ai_rcm.ai_health_recommendations(body_composition)
@@ -305,7 +328,8 @@ def calculate_metrics():
                 'body_composition': body_composition,
                 'ai_recommendations': ai_recommendations,
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'csv_saved': csv_success if 'csv_success' in locals() else False
+                'csv_saved': csv_success if 'csv_success' in locals() else False,
+                'mqtt_published': mqtt_client is not None
             }
             
             return jsonify(result)
@@ -330,6 +354,9 @@ def start_weight_measurement():
         # Reset current weight
         current_weight = None
         weight_measurement_active = True
+        
+        print("🔍 BLUETOOTH: Bắt đầu tìm kiếm thiết bị cân...")
+        print(f"📱 BLUETOOTH: Tìm kiếm thiết bị: {DEVICE_NAME}")
         
         # Start Bluetooth scan in background thread
         thread = threading.Thread(target=run_bluetooth_scan, daemon=True)
@@ -372,6 +399,7 @@ def confirm_weight():
     
     # Lưu cân nặng vào session
     session['confirmed_weight'] = confirmed_weight
+    print(f"✅ XÁC NHẬN: Cân nặng {confirmed_weight} kg đã được xác nhận từ người dùng")
     
     return jsonify({
         'success': True,
@@ -490,6 +518,40 @@ def get_user_history(name):
             'message': f'Lỗi khi lấy lịch sử: {str(e)}'
         })
 
+@app.route('/api/publish-mqtt', methods=['POST'])
+def publish_mqtt():
+    """Publish dữ liệu lên MQTT"""
+    try:
+        data = request.get_json()
+        body_composition = data.get('body_composition', {})
+        
+        if not body_composition:
+            return jsonify({
+                'success': False,
+                'message': 'Không có dữ liệu để publish'
+            })
+        
+        if not mqtt_client:
+            return jsonify({
+                'success': False,
+                'message': 'MQTT client chưa được khởi tạo'
+            })
+        
+        # Publish dữ liệu lên MQTT
+        mqtt_client.publish(MQTT_CONFIG['topic'], body_composition)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Đã publish dữ liệu lên MQTT thành công',
+            'topic': MQTT_CONFIG['topic']
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Lỗi khi publish MQTT: {str(e)}'
+        })
+
 @app.route('/api/clear-session', methods=['POST'])
 def clear_session():
     """Xóa dữ liệu session"""
@@ -505,5 +567,25 @@ def results():
     return render_template('results.html')
 
 if __name__ == '__main__':
+    # Configure logging to reduce verbosity
+    import logging
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    logging.getLogger('mqtt_client_handler').setLevel(logging.WARNING)
+    
+    # Initialize MQTT client when app starts
+    mqtt_client = initialize_mqtt()
+    
+    # Display web app address
+    print("=" * 60)
+    print("🚀E-HEALTH STATION WEB APP")
+    print("=" * 60)
+    print("📱 Web App đang chạy tại:")
+    print("   • Local:   http://localhost:5000")
+    print("   • Network: http://0.0.0.0:5000")
+    print("   • MQTT:    Đã kết nối thành công")
+    print("=" * 60)
+    print("💡 Nhấn Ctrl+C để dừng server")
+    print("=" * 60)
+    
     app.run(debug=True, host='0.0.0.0', port=5000)
 

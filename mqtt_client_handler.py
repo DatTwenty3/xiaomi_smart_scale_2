@@ -18,16 +18,18 @@ class MQTTClient:
         self.client.on_message = self.on_message
         self.broker_address = broker_address
         self.port = port
-        self.client.loop_start()
+        self.connected = False
 
     def on_connect(self, client, userdata, flags, rc):
         """
         Xử lý sự kiện kết nối MQTT.
         """
         if rc == 0:
+            self.connected = True
             logger.info("Kết nối với MQTT Broker thành công!")
             client.subscribe("v1/devices/me/rpc/request/+")
         else:
+            self.connected = False
             logger.error(f"Kết nối bị lỗi với mã: {rc}")
 
     def on_message(self, client, userdata, message):
@@ -49,7 +51,9 @@ class MQTTClient:
         Kết nối tới MQTT Broker.
         """
         try:
-            self.client.connect(self.broker_address, self.port)
+            if not self.connected:
+                self.client.connect(self.broker_address, self.port)
+                self.client.loop_start()
         except Exception as e:
             logger.error(f"Lỗi khi kết nối MQTT: {e}")
 
@@ -59,6 +63,6 @@ class MQTTClient:
         """
         try:
             self.client.publish(topic, json.dumps(payload), qos)
-            logger.info('Đã publish thành công lên MQTT Broker!')
+            logger.debug('Đã publish thành công lên MQTT Broker!')
         except Exception as e:
             logger.error(f"Đã xảy ra lỗi trong quá trình publish lên MQTT Broker: {e}")
