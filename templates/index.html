@@ -513,10 +513,25 @@
                                     <div id="balanceTestRunning" style="display: none;" class="modal-content-section">
                                         <h4 class="modal-section-title">Đang đo thời gian thăng bằng...</h4>
                                         <p class="modal-section-description">Hãy làm theo hướng dẫn lớn bên dưới, hệ thống sẽ tự thu thập mẫu và bắt đầu đo</p>
-                                        <div class="qr-scanner-container" style="position: relative;">
-                                            <video id="balanceVideo" autoplay playsinline style="width: 100%; border-radius: 12px; background: #000;"></video>
-                                            <canvas id="balanceCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+                                        
+                                        <!-- Camera và 3D Grid Container -->
+                                        <div class="balance-test-container">
+                                            <!-- Camera Section -->
+                                            <div class="camera-section">
+                                                <div class="qr-scanner-container" style="position: relative;">
+                                                    <video id="balanceVideo" autoplay playsinline style="width: 100%; border-radius: 12px; background: #000;"></video>
+                                                    <canvas id="balanceCanvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></canvas>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- 3D Landmark Grid Section -->
+                                            <div class="landmark-grid-section">
+                                                <div class="landmark-grid-container" id="balanceLandmarkGrid">
+                                                    <!-- 3D Landmark Grid sẽ được hiển thị ở đây -->
+                                                </div>
+                                            </div>
                                         </div>
+                                        
                                         <div class="text-center mt-3">
                                             <div id="balanceInstruction" style="font-size: 1.6rem; font-weight: 800; color: #0d6efd;">Chuẩn bị...</div>
                                             <div id="balanceSampleCounts" class="mt-2" style="font-size: 1.3rem; font-weight: 700; display: none;">
@@ -697,6 +712,11 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/pose.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/control_utils_3d.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6/control_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.3/drawing_utils.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils_3d@0.2/landmark_grid.css" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils@0.6/control_utils.css" crossorigin="anonymous">
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

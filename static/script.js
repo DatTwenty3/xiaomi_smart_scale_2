@@ -1749,6 +1749,9 @@ async function startClientSideBalanceDetection() {
         balanceCtx = balanceCanvasEl.getContext('2d');
         updateBalancePhaseLabel('Chuẩn bị...');
 
+        // Initialize 3D Landmark Grid
+        init3DLandmarkGrid();
+
         // Camera access
         balanceStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
         balanceVideoEl.srcObject = balanceStream;
@@ -1758,11 +1761,19 @@ async function startClientSideBalanceDetection() {
         pose = new Pose({
             locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`
         });
-        pose.setOptions({ modelComplexity: 1, smoothLandmarks: true, enableSegmentation: false, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+        pose.setOptions({ 
+            modelComplexity: 1, 
+            smoothLandmarks: true, 
+            enableSegmentation: false, 
+            minDetectionConfidence: 0.5, 
+            minTrackingConfidence: 0.5,
+            useWorldLandmarks: true  // Enable 3D world landmarks
+        });
         // Gắn handler: vừa vẽ landmarks, vừa cập nhật state machine
         pose.onResults((results) => {
             lastPoseLandmarks = results.poseLandmarks || null;
             onPoseResults(results);
+            update3DLandmarkGrid(results);
             advanceBalanceState();
         });
 
@@ -2017,4 +2028,105 @@ function stopBalanceCamera() {
     lastPoseLandmarks = null;
     twoLegSamples = [];
     oneLegSamples = [];
+    
+    // Clean up 3D Landmark Grid
+    if (window.balanceLandmarkGrid) {
+        window.balanceLandmarkGrid.updateLandmarks([]);
+    }
+}
+
+// 3D Landmark Grid Functions
+let balanceLandmarkGrid = null;
+
+function init3DLandmarkGrid() {
+    try {
+        const landmarkContainer = document.getElementById('balanceLandmarkGrid');
+        if (!landmarkContainer) {
+            console.warn('3D Landmark Grid container not found');
+            return;
+        }
+
+        // Clear container
+        landmarkContainer.innerHTML = '';
+
+        // Check if LandmarkGrid is available
+        if (typeof window.LandmarkGrid === 'undefined') {
+            console.warn('LandmarkGrid not available, showing loading message');
+            landmarkContainer.innerHTML = `
+                <div class="landmark-grid-loading">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <span>Đang tải 3D Grid...</span>
+                </div>
+            `;
+            return;
+        }
+
+        // Initialize 3D Landmark Grid
+        balanceLandmarkGrid = new window.LandmarkGrid(landmarkContainer, {
+            connectionColor: 0x333333,  // Dark gray for connections
+            definedColors: [
+                { name: 'LEFT', value: 0xff6b35 },  // Orange for left side
+                { name: 'RIGHT', value: 0x4ecdc4 }  // Teal for right side
+            ],
+            range: 2,
+            fitToGrid: true,
+            labelSuffix: 'm',
+            landmarkSize: 2,
+            numCellsPerAxis: 4,
+            showHidden: false,
+            centered: true,
+            backgroundColor: 0xffffff,  // White background
+            gridColor: 0x333333,       // Dark gray grid lines
+            axisColor: 0x666666,       // Medium gray for axes
+        });
+
+        // Store globally for cleanup
+        window.balanceLandmarkGrid = balanceLandmarkGrid;
+        
+        console.log('3D Landmark Grid initialized successfully');
+    } catch (error) {
+        console.error('Error initializing 3D Landmark Grid:', error);
+        const landmarkContainer = document.getElementById('balanceLandmarkGrid');
+        if (landmarkContainer) {
+            landmarkContainer.innerHTML = `
+                <div class="landmark-grid-loading">
+                    <span class="text-danger">Lỗi khởi tạo 3D Grid</span>
+                </div>
+            `;
+        }
+    }
+}
+
+function update3DLandmarkGrid(results) {
+    try {
+        if (!balanceLandmarkGrid) return;
+
+        if (results.poseWorldLandmarks) {
+            // Get pose connections and landmarks from MediaPipe
+            const poseConnections = window.POSE_CONNECTIONS || [];
+            const leftLandmarks = window.POSE_LANDMARKS_LEFT ? Object.values(window.POSE_LANDMARKS_LEFT) : [];
+            const rightLandmarks = window.POSE_LANDMARKS_RIGHT ? Object.values(window.POSE_LANDMARKS_RIGHT) : [];
+            
+            // Update 3D landmarks with pose connections and color coding
+            balanceLandmarkGrid.updateLandmarks(
+                results.poseWorldLandmarks, 
+                poseConnections, 
+                [
+                    { 
+                        list: leftLandmarks, 
+                        color: 'LEFT' 
+                    },
+                    { 
+                        list: rightLandmarks, 
+                        color: 'RIGHT' 
+                    }
+                ]
+            );
+        } else {
+            // Clear landmarks if no pose detected
+            balanceLandmarkGrid.updateLandmarks([]);
+        }
+    } catch (error) {
+        console.error('Error updating 3D Landmark Grid:', error);
+    }
 }

@@ -257,7 +257,15 @@
                             F --> G[📡 Kết nối và nhận dữ liệu cân nặng]
                             G --> H[✅ Xác nhận cân nặng]
                             
-                            H --> I[🧮 Tính toán các chỉ số cơ thể<br/>- BMI, BMR, TDEE<br/>- Tỷ lệ mỡ, nước, cơ<br/>- Khối lượng xương, protein<br/>- Mỡ nội tạng, cân nặng lý tưởng]
+                            H --> B1{🦶 Đo thời gian thăng bằng?}
+                            B1 -->|Có| BT1[📹 Chuẩn bị đo thăng bằng<br/>- Mở camera, kiểm tra quyền truy cập<br/>- Thu thập mẫu đứng 2 chân (20 mẫu)<br/>- Thu thập mẫu đứng 1 chân (20 mẫu)]
+                            BT1 --> BT2[⏱️ Đo và phân tích<br/>- Đếm thời gian giữ 1 chân
+                            <br/>- Theo dõi COM/offset theo thời gian
+                            <br/>- Cosine similarity so với mẫu chuẩn]
+                            BT2 --> I
+                            B1 -->|Không| I
+
+                            I[🧮 Tính toán các chỉ số cơ thể<br/>- BMI, BMR, TDEE<br/>- Tỷ lệ mỡ, nước, cơ<br/>- Khối lượng xương, protein<br/>- Mỡ nội tạng, cân nặng lý tưởng]
                             
                             I --> J[🤖 AI Phân tích và đưa ra khuyến nghị<br/>- Google Gemini AI<br/>- Khuyến nghị sức khỏe cá nhân hóa]
                             
@@ -276,6 +284,9 @@
                             style J fill:#fce4ec,stroke:#e91e63,stroke-width:2px
                             style K fill:#f1f8e9,stroke:#8bc34a,stroke-width:2px
                             style L fill:#e0f2f1,stroke:#009688,stroke-width:2px
+                            style B1 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+                            style BT1 fill:#fff3e0,stroke:#ff9800,stroke-width:2px
+                            style BT2 fill:#e8f5e8,stroke:#4caf50,stroke-width:2px
                     </div>
                 </div>
             </div>
@@ -343,8 +354,7 @@
                     <div class="file">├── qr_scaner.py</div> <span class="python"># CCCD QR scanning</span><br>
                     <div class="file">├── requirements.txt</div> <span class="python"># Python dependencies</span><br>
                     <div class="file">├── web_requirements.txt</div> <span class="python"># Web-specific packages</span><br>
-                    <div class="file">├── README_WEB_APP.md</div> <span class="python"># Web app documentation</span><br>
-                    <div class="file">├── QUICK_START.md</div> <span class="python"># Quick start guide</span><br>
+                    
                     <div class="file">├── project_flowchart.html</div> <span class="html"># Project documentation</span><br>
                     <div class="folder">├── pkl/</div><br>
                     <div class="file">│   ├── body_fat.pkl</div> <span class="python"># ML model for body fat</span><br>
@@ -407,6 +417,16 @@
                 <div class="api-endpoint">
                     <span class="method">POST</span> <span class="url">/api/clear-session</span>
                     <p>Xóa dữ liệu session</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/publish-mqtt</span>
+                    <p>Publish dữ liệu lên MQTT broker</p>
+                </div>
+
+                <div class="api-endpoint">
+                    <span class="method">POST</span> <span class="url">/api/balance-test</span>
+                    <p>Đo thời gian thăng bằng đứng 1 chân</p>
                 </div>
             </div>
 

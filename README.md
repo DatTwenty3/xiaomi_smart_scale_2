@@ -39,6 +39,39 @@ python app.py
 
 Mở trình duyệt và truy cập: **http://localhost:5000**
 
+## 🗺️ Sơ đồ luồng (Flow chart)
+
+Sơ đồ tổng quan quy trình người dùng trên web app, bao gồm đo cân Bluetooth và nhánh đo thăng bằng đứng 1 chân.
+
+```mermaid
+flowchart TD
+    A[👤 Người dùng truy cập Web App] --> B{Chọn phương thức nhập thông tin}
+
+    B -->|Nhập thủ công| C[📝 Nhập thông tin cá nhân<br/>- Họ tên, ngày sinh, giới tính<br/>- Chiều cao, hệ số hoạt động]
+    B -->|Quét CCCD| D[📱 Quét mã QR CCCD<br/>- Mở camera<br/>- Trích xuất thông tin tự động]
+
+    C --> E[⚖️ Đo cân nặng từ Bluetooth Scale]
+    D --> E
+
+    E --> F[🔍 Tìm kiếm thiết bị Bluetooth<br/>- Crenot Gofit S2<br/>- Mi Scale 2]
+    F --> G[📡 Kết nối và nhận dữ liệu cân nặng]
+    G --> H[✅ Xác nhận cân nặng]
+
+    H --> B1{🦶 Đo thời gian thăng bằng?}
+    B1 -->|Có| BT1[📹 Chuẩn bị đo thăng bằng<br/>- Cho phép camera<br/>- Thu thập mẫu đứng 2 chân (20)<br/>- Thu thập mẫu đứng 1 chân (20)]
+    BT1 --> BT2[⏱️ Đo và phân tích<br/>- Đếm thời gian giữ 1 chân<br/>- Theo dõi COM/offset thời gian<br/>- Cosine similarity so mẫu chuẩn]
+    BT2 --> I
+    B1 -->|Không| I
+
+    I[🧮 Tính toán các chỉ số cơ thể<br/>- BMI, BMR, TDEE<br/>- Tỷ lệ mỡ, nước, cơ<br/>- Khối lượng xương, protein<br/>- Mỡ nội tạng, cân nặng lý tưởng]
+    I --> J[🤖 AI Phân tích và đưa ra khuyến nghị<br/>- Google Gemini AI<br/>- Khuyến nghị sức khỏe cá nhân hóa]
+    J --> K[💾 Lưu trữ dữ liệu<br/>- CSV file<br/>- MQTT broker]
+    K --> L[📊 Hiển thị kết quả<br/>- Modal popup<br/>- Trang chi tiết<br/>- Biểu đồ]
+    L --> M[🔄 Có thể đo lại hoặc xem lịch sử]
+```
+
+> Gợi ý: GitHub hỗ trợ Mermaid, bạn có thể xem trực tiếp sơ đồ khi mở README.
+
 ## 🎯 Tính năng chính
 
 ### ✅ **Nhập thông tin thủ công**
@@ -171,6 +204,64 @@ MQTT_CONFIG = {
     'client_id': "smart-scale",
     'topic': "v1/devices/me/telemetry"
 }
+```
+
+## 🏗️ Kiến trúc hệ thống (Mermaid)
+
+```mermaid
+flowchart TB
+    subgraph Frontend[🌐 Frontend Layer]
+        A[Web Browser]
+        B[HTML/CSS/JS]
+        C[Bootstrap UI]
+    end
+
+    subgraph App[🖥️ Application Layer]
+        D[Flask Web App]
+        E[Tkinter Desktop App]
+        F[API Endpoints]
+    end
+
+    subgraph Biz[🧠 Business Logic Layer]
+        G[User Info Manager]
+        H[Body Composition Calculator]
+        I[AI Recommendation Engine]
+        J[QR Scanner Handler]
+    end
+
+    subgraph Hardware[📡 Hardware Interface Layer]
+        K[Bluetooth BLE Client]
+        L[MQTT Client]
+        M[Camera Interface]
+    end
+
+    subgraph External[🔧 External Services]
+        N[Google Gemini AI]
+        O[MQTT Broker]
+        P[Bluetooth Scale Devices]
+    end
+
+    subgraph Data[💾 Data Layer]
+        Q[CSV Files]
+        R[Pickle Models]
+        S[Session Storage]
+    end
+
+    A --> B --> C --> D --> F
+    E --> F
+    F --> G
+    F --> H
+    F --> I
+    F --> J
+    G --> K
+    H --> L
+    I --> N
+    J --> M
+    K --> P
+    L --> O
+    H --> Q
+    I --> R
+    G --> S
 ```
 
 ### Cấu trúc dữ liệu được publish
