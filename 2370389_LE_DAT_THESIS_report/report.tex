@@ -1,0 +1,78 @@
+% 'draft' mode can be used to speed up compilation
+\documentclass[oneside, final]{hcmut-report}
+\usepackage{codespace}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% Draft watermark
+% https://github.com/callegar/LaTeX-draftwatermark
+
+% Encodings
+\usepackage{gensymb,textcomp}
+
+% Better tables
+% Wide tables go to https://tex.stackexchange.com/q/332902
+\usepackage{array,longtable,multicol,multirow,siunitx,tabularx}
+
+% Better enum
+\usepackage{enumitem}
+
+% Graphics
+\usepackage{caption,float}
+
+% Add options for figures, like max width, framing, etc.
+\usepackage[export]{adjustbox}
+
+% References
+% Use \Cref{} instead of \ref{}
+\usepackage[nameinlink]{cleveref}
+
+% FOR DEMONSTRATION PURPOSES, REMOVE IN PRODUCTION
+\usepackage{mwe}
+
+% Please add the following required packages to your document preamble:
+\usepackage[table,xcdraw]{xcolor}
+% Beamer presentation requires \usepackage{colortbl} instead of \usepackage[table,xcdraw]{xcolor}
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
+
+% Sub-preambles
+% https://github.com/MartinScharrer/standalone
+
+% Configurations
+\coursename{THỰC TẬP 2}
+\reporttype{Báo cáo đề cương luận văn Thạc sĩ}
+\title{Xây dựng hệ thống chăm sóc sức khoẻ điện tử với thiết bị theo dõi sức khoẻ thông minh}
+\advisor{& TS. Lê Trọng Nhân &}
+\stuname{%
+  & Lê Đạt & 2370389 \\
+}
+
+% Set depth of numbering for counters
+\AtBeginDocument{\counterwithin{lstlisting}{section}}
+
+\begin{document}
+\coverpage
+\include{chapters/chapter0_loicamon}
+\tableofcontents
+\newpage
+\listoffigures
+\newpage
+\listoftables
+\newpage
+%\lstlistoflistings{}
+
+\clearpage
+\include{chapters/chapter1_tongquan}
+\include{chapters/chapter2_yeucauvamuctieu}
+\include{chapters/chapter3_cosolythuyet}
+\include{chapters/chapter4_baocaoketquathuchien}
+\include{chapters/chapter5_tongket}
+
+\renewcommand{\refname}{Tài liệu tham khảo}
+\bibliographystyle{plain}
+\bibliography{refs/refs.bib}
+\nocite{*}
+
+\end{document}
